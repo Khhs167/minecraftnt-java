@@ -19,10 +19,7 @@ public class PlayerEntity extends Pawn  {
     private boolean isGrounded;
     private boolean isSprinting;
 
-    private final float walkSpeed = 5f;
     private final float sprintSpeed = 10f;
-    private final float jumpForce = 6f;
-    private final float gravity = -15f;
 
     private Vector3 velocity = new Vector3();
 
@@ -46,23 +43,19 @@ public class PlayerEntity extends Pawn  {
         if(keyboard.isKeyDown(GLFW_KEY_D))
             horizontalVelocity = horizontalVelocity.add(getTransform().getRight().negate());
 
-        if(raycast(getTransform().location.add(Vector3.down().multiply(1.8f)), Vector3.down(), 0.1f) && keyboard.isKeyDown(GLFW_KEY_SPACE))
-            velocity.setY(jumpForce);
-
+        float walkSpeed = 5f;
         horizontalVelocity = horizontalVelocity.normalize().multiply(walkSpeed);
 
         velocity.setX(horizontalVelocity.getX());
         velocity.setZ(horizontalVelocity.getZ());
 
+        float gravity = -15f;
         velocity.setY(velocity.getY() + gravity * Minecraft.getInstance().getDeltaTime());
 
 
         if(horizontalVelocity.length() > 0) {
-
-            final float width = 0.1f;
             int loopCount = 0;
-            while (raycast(getTransform().location.add(Vector3.up().multiply(-1.79f)), velocity.normalize(),
-                    width + velocity.length() * Minecraft.getInstance().getDeltaTime()) && loopCount < 50) {
+            while (checkHorizontalCollissions() && loopCount < 50) {
                 velocity = velocity.add(velocity.negate().multiply(1f));
                 loopCount++;
             }
@@ -95,6 +88,13 @@ public class PlayerEntity extends Pawn  {
         if(hasDoneYJump)
             velocity.setY(0);
 
+        // Because we have to jump after resetting the pos and velocity!
+
+        if(raycast(getTransform().location.add(Vector3.down().multiply(1.7f)), Vector3.down(), 1.1f) && keyboard.isKeyDown(GLFW_KEY_SPACE) && velocity.getY() == 0) {
+            float jumpForce = 6f;
+            velocity.setY(jumpForce);
+        }
+
         getTransform().move(Vector3.up().multiply(velocity.getY() * Minecraft.getInstance().getDeltaTime()));
 
 
@@ -116,11 +116,23 @@ public class PlayerEntity extends Pawn  {
                 Minecraft.getInstance().getWorld().setBlock(lookPos, Block.IDENTIFIER_COBBLESTONE);
             }
             if(mouse.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)){
+                assert lookPosInc != null;
                 Minecraft.getInstance().getWorld().setBlock(lookPosInc, Block.IDENTIFIER_AIR);
             }
         } else{
             Minecraft.getInstance().setPlacementPosition(Vector3.zero());
         }
+    }
+
+    private boolean checkHorizontalCollissions(){
+        final float width = 0.1f;
+
+        return raycast(getTransform().location.add(Vector3.up().multiply(-1.79f)), velocity.normalize(),
+                width + velocity.length() * Minecraft.getInstance().getDeltaTime()) ||
+                raycast(getTransform().location.add(Vector3.up().multiply(-1f)), velocity.normalize(),
+                        width + velocity.length() * Minecraft.getInstance().getDeltaTime()) ||
+                raycast(getTransform().location.add(Vector3.up().multiply(-0f)), velocity.normalize(),
+                        width + velocity.length() * Minecraft.getInstance().getDeltaTime());
     }
 
     private Vector3I updatePlacement(){
@@ -133,9 +145,8 @@ public class PlayerEntity extends Pawn  {
         while (distance < maxLength){
             if(Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(pos.floor())).hasCollisions()){
                 pos = pos.add(direction.negate().multiply(stepSize));
-                Vector3I flooredPos = pos.floor();
 
-                return flooredPos;
+                return pos.floor();
             }
 
             pos = pos.add(direction.multiply(stepSize));
@@ -202,9 +213,8 @@ public class PlayerEntity extends Pawn  {
 
         while (distance < maxLength){
             if(Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(pos.floor())).hasCollisions()){
-                Vector3I flooredPos = pos.floor();
 
-                return flooredPos;
+                return pos.floor();
             }
 
             pos = pos.add(direction.multiply(stepSize));
