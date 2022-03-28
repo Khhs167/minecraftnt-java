@@ -90,12 +90,6 @@ public class Chunk {
         lightning = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH][6];
         illumination = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
 
-        for (float[][] arr: illumination) {
-            for (float[] arr2: arr) {
-                Arrays.fill(arr2, -1);
-            }
-        }
-
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
                 float currentStrength = 1f;
@@ -136,13 +130,16 @@ public class Chunk {
         if(illumination[x][y][z] >= strength)
             return;
 
+        if(strength <= 0)
+            return;
+
         illumination[x][y][z] = strength;
         float decrease = getBlock(voxels[x][y][z]).getOpacity();
         float illumination = getBlock(voxels[x][y][z]).getIllumination();
 
         for(int i = 0; i < 6; i++) {
             Vector3I faceCheck = VoxelInformation.faceChecks[i];
-            floodFillIllumination(x + faceCheck.getX(), y + faceCheck.getY(), z + faceCheck.getZ(), strength - decrease - 0.5f + illumination, depth + 1);
+            floodFillIllumination(x + faceCheck.getX(), y + faceCheck.getY(), z + faceCheck.getZ(), strength - decrease - 0.1f + illumination, depth + 1);
         }
 
     }
