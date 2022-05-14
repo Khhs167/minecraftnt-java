@@ -1,6 +1,7 @@
 package server.world;
 
 import client.rendering.Mesh;
+import client.rendering.Shader;
 import client.voxels.VoxelInformation;
 import server.Minecraft;
 import server.blocks.Block;
@@ -9,8 +10,8 @@ import util.*;
 import util.registries.Registry;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 import static server.Minecraft.TERRAIN_ATLAS_TEXTURE_SIZE;
 
@@ -20,30 +21,31 @@ public class Chunk {
 
     private Vector2I pos;
     private Transform transform;
-    private short[][][] voxels = new short[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
-    private float[][][][] lightning = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH][6];
-    private float[][][] illumination = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+    private short[] voxels = new short[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
+    private float[][] lightning = new float[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH][6];
+    private float[] illumination = new float[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
     private ArrayList<Identifier> map = new ArrayList<>();
 
     private Mesh mesh;
+
+    public Vector2I getPos() {
+        return pos;
+    }
 
     public Chunk(Vector2I pos){
         mesh = new Mesh();
         this.pos = pos;
         this.transform = new Transform(new Vector3(pos.getX() * CHUNK_WIDTH, 0, pos.getY() * CHUNK_WIDTH));
+    }
 
-        for(int x = 0; x < Chunk.CHUNK_WIDTH; x++) {
-            voxels[x] = new short[CHUNK_HEIGHT][];
-            for (int y = 0; y < Chunk.CHUNK_HEIGHT; y++) {
-                voxels[x][y] = new short[CHUNK_WIDTH];
-            }
-        }
+    private int get3DIndex(int x, int y, int z){
+        return (CHUNK_WIDTH * CHUNK_HEIGHT * z) + (CHUNK_WIDTH * y) + x;
     }
 
     public void setVoxel(Vector3I pos, Identifier type){
         if(!map.contains(type))
             map.add(type);
-        voxels[pos.getX()][pos.getY()][pos.getZ()] = (short)map.indexOf(type);
+        voxels[get3DIndex(pos.getX(), pos.getY(), pos.getZ())] = (short)map.indexOf(type);
     }
 
     private Identifier getID(short identifier)
@@ -58,7 +60,17 @@ public class Chunk {
         if(!isVoxelInChunk(x, worldPos.getY(), z))
             return Block.IDENTIFIER_AIR;
 
-        return getID(voxels[x][worldPos.getY()][z]);
+        return getID(voxels[get3DIndex(x, worldPos.getY(), z)]);
+    }
+
+    public Vector3I getLocalPos(int worldX, int worldY, int worldZ){
+        int x = worldX - CHUNK_WIDTH * pos.getX();
+        int z = worldZ - CHUNK_WIDTH * pos.getY();
+        return new Vector3I(x, worldY, z);
+    }
+
+    public void setIllumination(int x, int y, int z, float s){
+        illumination[get3DIndex(x, y, z)] = s;
     }
 
     public float getIllumination(Vector3I worldPos){
@@ -68,7 +80,7 @@ public class Chunk {
         if(!isVoxelInChunk(x, worldPos.getY(), z))
             return 1f;
 
-        return illumination[x][worldPos.getY()][z];
+        return illumination[get3DIndex(x, worldPos.getY(), z)];
     }
 
     public void setVoxelWorld(Vector3I worldPos, Identifier identifier){
@@ -86,9 +98,31 @@ public class Chunk {
         return Registry.BLOCKS.get(getID(identifier));
     }
 
-    public void rebuildLightmap(){
-        lightning = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH][6];
-        illumination = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+    public void rebuildLightmap(boolean rebuildGlobalIllumination){
+        lightning = new float[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH][6];
+
+        if(rebuildGlobalIllumination)
+            rebuildGlobalIllumination();
+
+        for (int x = 0; x < CHUNK_WIDTH; x++) {
+            for (int y = 0; y < CHUNK_HEIGHT; y++) {
+                for (int z = 0; z < CHUNK_WIDTH; z++) {
+                    for (int p = 0; p < 6; p++) {
+                        Vector3I checkPos = VoxelInformation.faceChecks[p].add(new Vector3I(x, y, z));
+                        if(isVoxelInChunk(checkPos.getX(), checkPos.getY(), checkPos.getZ()))
+                            lightning[get3DIndex(x, y, z)][p] = illumination[get3DIndex(checkPos.getX(), checkPos.getY(), checkPos.getZ())];
+                        else
+                            lightning[get3DIndex(x, y, z)][p] = Minecraft.getInstance().getWorld().getLightLevel(checkPos);
+                    }
+                }
+            }
+        }
+
+        floodFillIllumination();
+    }
+
+    private void rebuildGlobalIllumination(){
+        illumination = new float[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
@@ -97,50 +131,64 @@ public class Chunk {
                     if(currentStrength <= 0) {
                         break;
                     }
-                    floodFillIllumination(x, y, z, currentStrength, 0);
-                    //illumination[x][y][z] = currentStrength;
-                    currentStrength -= getBlock(voxels[x][y][z]).getOpacity();
+                    enqueueFloodFillIllumination(x, y, z, currentStrength);
+                    currentStrength -= getBlock(voxels[get3DIndex(x, y, z)]).getOpacity();
                 }
             }
         }
 
-        for (int x = 0; x < CHUNK_WIDTH; x++) {
-            for (int y = 0; y < CHUNK_HEIGHT; y++) {
-                for (int z = 0; z < CHUNK_WIDTH; z++) {
-                    for (int p = 0; p < 6; p++) {
-                        Vector3I checkPos = VoxelInformation.faceChecks[p].add(new Vector3I(x, y, z));
-                        if(isVoxelInChunk(checkPos.getX(), checkPos.getY(), checkPos.getZ()))
-                            lightning[x][y][z][p] = illumination[checkPos.getX()][checkPos.getY()][checkPos.getZ()];
-                        else
-                            lightning[x][y][z][p] = Minecraft.getInstance().getWorld().getLightLevel(checkPos);
-                    }
-                }
-            }
+        floodFillIllumination();
+    }
+
+    public void enqueueFloodFillIllumination(int x, int y, int z, float strength){
+        illuminationUpdateQueue.add(new illuminationUpdate(x, y, z, strength));
+    }
+
+    private class illuminationUpdate{
+        public int x, y, z;
+        public float strength;
+
+        public illuminationUpdate(int x, int y, int z, float strength){
+            this.strength = strength;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
     }
 
-    private void floodFillIllumination(int x, int y, int z, float strength, int depth){
+    private Queue<illuminationUpdate> illuminationUpdateQueue = new LinkedList<>();
 
-        if(!isVoxelInChunk(x, y, z))
-            return;
+    public void floodFillIllumination(){
+        long tile = System.currentTimeMillis();
+        while(!illuminationUpdateQueue.isEmpty()) {
+            illuminationUpdate update = illuminationUpdateQueue.poll();
+            int x = update.x;
+            int y = update.y;
+            int z = update.z;
+            float strength = update.strength;
 
-        if(depth > 1000)
-            return;
+            if (!isVoxelInChunk(x, y, z))
+                continue;
 
-        if(illumination[x][y][z] >= strength)
-            return;
+            if (illumination[get3DIndex(x, y, z)] >= strength)
+                continue;
 
-        if(strength <= 0)
-            return;
+            if (strength <= 0)
+                continue;
 
-        illumination[x][y][z] = strength;
-        float decrease = getBlock(voxels[x][y][z]).getOpacity();
-        float illumination = getBlock(voxels[x][y][z]).getIllumination();
+            illumination[get3DIndex(x, y, z)] = strength;
+            float decrease = getBlock(voxels[get3DIndex(x, y, z)]).getOpacity();
+            float illumination = getBlock(voxels[get3DIndex(x, y, z)]).getIllumination();
 
-        for(int i = 0; i < 6; i++) {
-            Vector3I faceCheck = VoxelInformation.faceChecks[i];
-            floodFillIllumination(x + faceCheck.getX(), y + faceCheck.getY(), z + faceCheck.getZ(), strength - decrease - 0.1f + illumination, depth + 1);
+            for (int i = 0; i < 6; i++) {
+                Vector3I faceCheck = VoxelInformation.faceChecks[i];
+                enqueueFloodFillIllumination(x + faceCheck.getX(), y + faceCheck.getY(), z + faceCheck.getZ(), strength - decrease - 0.1f + illumination);
+            }
+
+
         }
+
+        System.out.println("Reflooding lightmaps took: " + (System.currentTimeMillis() - tile) + "ms");
 
     }
 
@@ -155,7 +203,7 @@ public class Chunk {
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int y = 0; y < CHUNK_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_WIDTH; z++) {
-                    Block block = getBlock(voxels[x][y][z]);
+                    Block block = getBlock(voxels[get3DIndex(x, y, z)]);
                     if (block.shouldBuildMesh()) {
                         Vector3 pos = new Vector3(x, y, z);
                         for (int p = 0; p < 6; p++) {
@@ -166,7 +214,7 @@ public class Chunk {
                                     int triangleIndex = VoxelInformation.voxelTris[p][i];
                                     vertices.add(VoxelInformation.voxelVerts[triangleIndex].add(pos));
                                     triangles.add(vertexIndex);
-                                    colors.add(lightning[x][y][z][p]);
+                                    colors.add(lightning[get3DIndex(x, y, z)][p]);
 
                                     uvs.add(convertUV(VoxelInformation.voxelUvs[i], textureID));
 
@@ -212,7 +260,7 @@ public class Chunk {
                             this.pos.getY() * CHUNK_WIDTH + pos.getZ()
                             ))).renderNeighbourFaces();
 
-        return getBlock(voxels[pos.getX()][pos.getY()][pos.getZ()]).renderNeighbourFaces();
+        return getBlock(voxels[get3DIndex(pos.getX(), pos.getY(), pos.getZ())]).renderNeighbourFaces();
 
     }
 
@@ -225,6 +273,6 @@ public class Chunk {
     }
 
     public void render(){
-        mesh.render(Minecraft.getInstance().getBaseShader(), transform);
+        mesh.render(Registry.SHADERS.get(Shader.SHADER_BASE), transform);
     }
 }

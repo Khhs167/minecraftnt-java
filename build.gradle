@@ -39,15 +39,22 @@ project.ext.lwjglVersion = "3.3.1"
 
 switch (OperatingSystem.current()) {
     case OperatingSystem.LINUX:
-        project.ext.lwjglNatives = "natives-linux"
-        break
+    def osArch = System.getProperty("os.arch")
+    project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64")
+            ? "natives-linux-${osArch.contains("64") || osArch.startsWith("armv8") ? "arm64" : "arm32"}"
+            : "natives-linux"
+    break
     case OperatingSystem.MAC_OS:
-        project.ext.lwjglNatives = "natives-macos"
-        break
+    project.ext.lwjglNatives = "natives-macos"
+    break
     case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
-        break
+    def osArch = System.getProperty("os.arch")
+    project.ext.lwjglNatives = osArch.contains("64")
+            ? "natives-windows${osArch.startsWith("aarch64") ? "-arm64" : ""}"
+            : "natives-windows-x86"
+    break
 }
+
 
 repositories {
     mavenCentral()

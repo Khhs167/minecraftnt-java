@@ -76,4 +76,10 @@ public class Mesh {
 
         MemoryUtil.memFree(matrix4buffer);
     }
+
+    public void renderNoPrep(){
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, triangles.length, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }

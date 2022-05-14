@@ -22,6 +22,20 @@ public class Resources {
 
     }
 
+    public static boolean fileExists(String fileName) {
+
+        // The class loader that loaded the class
+        ClassLoader classLoader = Resources.class.getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(fileName);
+
+        // the stream holding the file content
+        if (inputStream == null)
+            return false;
+
+        return true;
+
+    }
+
     public static byte[] loadResourceAsBytes(String path){
         InputStream stream = loadResourceAsStream(path);
         byte[] bytes = new byte[0];

@@ -1,5 +1,7 @@
 package util.registries;
+import client.rendering.Shader;
 import client.rendering.Texture;
+import client.ui.fonts.Font;
 import server.blocks.Block;
 import server.entities.Entity;
 import server.world.generators.IRWorldGenerator;
@@ -28,4 +30,6 @@ public class Registry<T>{
     public static final Registry<Block> BLOCKS = new Registry<>();
     public static final Registry<Texture> TEXTURE_ATLASES = new Registry<>();
     public static final Registry<Class<? extends Entity>> ENTITIES = new Registry<>();
+    public static final Registry<Font> FONTS = new Registry<>();
+    public static final Registry<Shader> SHADERS = new Registry<>();
 }

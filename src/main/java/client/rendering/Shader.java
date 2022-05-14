@@ -1,11 +1,36 @@
 package client.rendering;
 
+import util.Identifier;
+import util.resources.Resources;
+
 import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL33.*;
 
 public class Shader {
+
+    public static final Identifier SHADER_BASE = new Identifier("minecraft", "shader_base");
+    public static final Identifier SHADER_PLACE = new Identifier("minecraft", "shader_place");
+    public static final Identifier SHADER_FONT = new Identifier("minecraft", "shader_font");
+
     private int handle;
+
+    public static Shader LoadFromName(String name){
+        String fShader = "";
+        if(Resources.fileExists("shaders/" + name + "/fragment.glsl"))
+            fShader = Resources.loadResourceAsString("shaders/" + name + "/fragment.glsl");
+        else
+            fShader = Resources.loadResourceAsString("shaders/default/fragment.glsl");
+
+        String vShader = "";
+        if(Resources.fileExists("shaders/" + name + "/vertex.glsl"))
+            vShader = Resources.loadResourceAsString("shaders/" + name + "/vertex.glsl");
+        else
+            vShader = Resources.loadResourceAsString("shaders/default/vertex.glsl");
+
+        return new Shader(vShader, fShader);
+    }
+
     public Shader(String vertex, String fragment){
         int vertexID = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexID, vertex);

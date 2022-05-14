@@ -5,13 +5,9 @@ import client.rendering.Mesh;
 import client.rendering.Shader;
 import client.rendering.Texture;
 import client.rendering.Window;
+import client.ui.fonts.Font;
 import client.voxels.VoxelInformation;
 import imgui.ImGui;
-import imgui.app.Color;
-import imgui.flag.ImGuiConfigFlags;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import server.blocks.Block;
 import server.entities.PlayerEntity;
 import server.entities.special.Pawn;
 import server.world.World;
@@ -55,6 +51,16 @@ public class Minecraft {
         return theMinecraft;
     }
 
+    private static float GuiScale = 1f;
+
+    public static float getGuiScale() {
+        return GuiScale;
+    }
+
+    public static void setGuiScale(float guiScale) {
+        GuiScale = guiScale;
+    }
+
     public static Version getVersion(){
         return new Version(0, 1, 0);
     }
@@ -96,18 +102,6 @@ public class Minecraft {
         placementTransform.location.setY(-placementTransform.location.getY());
     }
 
-    private Shader baseShader;
-
-    public Shader getBaseShader(){
-        return baseShader;
-    }
-
-    private Shader placementShader;
-
-    public Shader getPlacementShader() {
-        return placementShader;
-    }
-
     public void loading(){
         System.out.println("Registering world generations... ");
         Registry.WORLD_GENERATORS.add(IRWorldGenerator.IDENTIFIER_FLAT, new FlatWorldGen());
@@ -119,18 +113,16 @@ public class Minecraft {
     public void onLoaded() {
 
         System.out.println("Generating shaders...");
-        baseShader = new Shader(
-                Resources.loadResourceAsString("shaders/default/vertex.glsl"),
-                Resources.loadResourceAsString("shaders/default/fragment.glsl")
-        );
+        Registry.SHADERS.add(Shader.SHADER_BASE, Shader.LoadFromName("default"));
 
-        placementShader = new Shader(
-                Resources.loadResourceAsString("shaders/default/vertex.glsl"),
-                Resources.loadResourceAsString("shaders/placement/fragment.glsl")
-        );
+        Registry.SHADERS.add(Shader.SHADER_FONT, Shader.LoadFromName("font"));
+
+        Registry.SHADERS.add(Shader.SHADER_PLACE, Shader.LoadFromName("placement"));
 
         Registry.TEXTURE_ATLASES.add(TERRAIN_ATLAS_IDENTIFIER, new Texture("assets/terrain_mc.png"));
         Registry.TEXTURE_ATLASES.add(new Identifier("minecraft", "test"), new Texture("assets/test.png"));
+
+        Registry.FONTS.add(Font.FONT_DEFAULT, new Font("assets/font.png"));
 
         System.out.println("Generating flat world");
         enterWorld(IRWorldGenerator.IDENTIFIER_OVERWORLD);
@@ -208,7 +200,9 @@ public class Minecraft {
     public void render(){
         Registry.TEXTURE_ATLASES.get(TERRAIN_ATLAS_IDENTIFIER).use();
         getWorld().render();
-        placementMesh.render(getPlacementShader(), placementTransform);
+        placementMesh.render(Registry.SHADERS.get(Shader.SHADER_PLACE), placementTransform);
+
+        Registry.FONTS.get(Font.FONT_DEFAULT).renderText("HELLOWORLD", new Vector2(1, 0));
 
         // ImGUI debug info
         if(ImGui.begin("Debug")){
@@ -282,6 +276,10 @@ public class Minecraft {
 
             if(wasFocused)
                 ImGui.endDisabled();
+            var scale = new float[] { getGuiScale() };
+            if(ImGui.sliderFloat("GUI scale", scale, 1, 4)){
+                setGuiScale(scale[0]);
+            }
 
             ImGui.end();
         }

@@ -1,12 +1,17 @@
 package server.world;
 
+import client.voxels.VoxelInformation;
 import server.blocks.Block;
 import server.entities.Entity;
+import server.performance.ThreadedMethodExecutor;
 import server.world.generators.IRWorldGenerator;
+import server.world.threading.RebuildChunkMethod;
 import util.*;
 import util.registries.Registry;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 
 public class World {
@@ -14,7 +19,7 @@ public class World {
 
     private ArrayList<Entity> entities = new ArrayList<>();
 
-    private final Vector2I BASE_WORLD_SIZE = new Vector2I(16, 16);
+    private final Vector2I BASE_WORLD_SIZE = new Vector2I(1, 1);
 
     public Entity createEntity(Vector3 position, Identifier identifier){
         try {
@@ -41,7 +46,7 @@ public class World {
 
         for (int x = 0; x < BASE_WORLD_SIZE.getX(); x++) {
             for (int y = 0; y < BASE_WORLD_SIZE.getY(); y++) {
-                chunks[x][y].rebuildLightmap();
+                chunks[x][y].rebuildLightmap(true);
             }
         }
 
@@ -125,19 +130,34 @@ public class World {
 
         int x = pos.getX() - Chunk.CHUNK_WIDTH * cy;
         int z = pos.getZ() - Chunk.CHUNK_WIDTH * cx;
-
-        chunks[cx][cy].setVoxelWorld(pos, type);
-        chunks[cx][cy].rebuildLightmap();
-        chunks[cx][cy].rebuildMesh();
+        Chunk chunk = chunks[cx][cy];
+        chunk.setVoxelWorld(pos, type);
+        for (int i = 0; i < 6; i++){
+            Vector3I p = new Vector3I(x, pos.getY(), z).add(VoxelInformation.faceChecks[i]);
+            chunk.enqueueFloodFillIllumination(p.getX(), p.getY(), p.getZ(), chunk.getIllumination(p));
+        }
+        chunk.rebuildMesh();
+        //ThreadedMethodExecutor.getExecutor().addThreadedMethod(new RebuildChunkMethod(cx, cy, this));
 
         Chunk[] n = getNeighbourChunks(new Vector2I(cx, cy));
         for (Chunk c: n) {
-            c.rebuildLightmap();
-            c.rebuildMesh();
+            ThreadedMethodExecutor.getExecutor().addThreadedMethod(new RebuildChunkMethod(c.getPos().getX(), c.getPos().getY(), this));
         }
     }
 
+    private Queue<Vector2I> chunksToRebuild = new LinkedList<>();
+
+    public void enqueueRebuild(Vector2I chunk){
+        chunksToRebuild.add(chunk);
+    }
+
     public void render(){
+
+        while(!chunksToRebuild.isEmpty()){
+            Vector2I c = chunksToRebuild.remove();
+            chunks[c.getX()][c.getY()].rebuildMesh();
+        }
+
         for (int x = 0; x < chunks.length; x++){
             for (int y = 0; y < chunks[x].length; y++){
                 chunks[x][y].render();
@@ -150,6 +170,7 @@ public class World {
     }
 
     public void update() {
+
         for (Entity e : entities) {
             e.update();
         }
