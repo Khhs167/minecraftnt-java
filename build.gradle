@@ -4,8 +4,8 @@ plugins {
     id 'application'
 }
 
-group 'net.jimmy'
-version '1.0-SNAPSHOT'
+group 'net.minecraftn'
+version '1.0'
 
 dependencyManagement {
     imports {
@@ -18,10 +18,6 @@ repositories {
 }
 
 dependencies {
-
-    implementation 'org.apache.logging.log4j:log4j-api'
-    implementation 'org.apache.logging.log4j:log4j-core'
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl'
     implementation 'org.l33tlabs.twl:pngdecoder:1.0'
     implementation 'org.joml:joml:1.9.6'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
@@ -32,6 +28,20 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// log4j
+
+dependencies {
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.17.2'
+}
+
+
+
+
+
+// LWJGL
 
 import org.gradle.internal.os.OperatingSystem
 
@@ -77,10 +87,12 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 }
 
+// Manifests
+
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
-        attributes "Main-Class": "Program"
+        attributes "Main-Class": "net.minecraftnt.client.Main"
     }
 
     from {
@@ -89,7 +101,7 @@ jar {
 }
 
 application {
-    mainClassName = 'Program'
+    mainClass.set('net.minecraftnt.client.Main')
 }
 
 repositories {
@@ -98,4 +110,5 @@ repositories {
 
 dependencies {
     implementation "io.github.spair:imgui-java-app:1.86.4"
+    implementation 'org.awaitility:awaitility:4.2.0'
 }

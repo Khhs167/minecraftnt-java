@@ -7,5 +7,5 @@ in vec2 vertexUV; // the input variable from the vertex shader (same name and sa
 
 void main()
 {
-    FragColor = vec4(1.0, 1.0, 1.0, 0.5);
+    FragColor = vec4(0, 0, 0, 1);
 }
