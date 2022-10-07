@@ -1,2 +1,7 @@
 /build
 /build/*
+/resources
+/logs
+/.gradle
+/.idea
+/imgui.ini
