@@ -1,2 +1,3 @@
 rootProject.name = 'minecraftnt'
+include 'launcher'
 

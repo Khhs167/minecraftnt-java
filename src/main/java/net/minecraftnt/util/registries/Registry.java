@@ -10,7 +10,7 @@ import net.minecraftnt.util.Identifier;
 import java.util.HashMap;
 
 public class Registry<T>{
-    private HashMap<Identifier, T> map;
+    private final HashMap<Identifier, T> map;
     private Registry(){
         map = new HashMap<>();
     }
