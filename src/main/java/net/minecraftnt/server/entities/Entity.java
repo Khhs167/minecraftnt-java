@@ -1,6 +1,5 @@
 package net.minecraftnt.server.entities;
 
-import net.minecraftnt.client.main.ClientMainHandler;
 import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.physics.PhysicsBody;
 import net.minecraftnt.util.Transform;

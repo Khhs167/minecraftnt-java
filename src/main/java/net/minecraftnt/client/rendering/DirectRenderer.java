@@ -1,7 +1,6 @@
 package net.minecraftnt.client.rendering;
 
-import net.minecraftnt.client.main.ClientMainHandler;
-import net.minecraftnt.server.Minecraft;
+import net.minecraftnt.client.ClientMainHandler;
 import net.minecraftnt.util.Vector3;
 import net.minecraftnt.util.registries.Registry;
 import org.lwjgl.system.MemoryUtil;
@@ -16,8 +15,7 @@ import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
 
 /**
  * A rendering API for quick debug rendering. Less powerful than glBegin/glEnd and designed for OpenGL 3.3
@@ -200,6 +198,11 @@ public final class DirectRenderer {
         VERTICES.add(vertex.color.getZ());
 
         vertexCount++;
+    }
+
+    public static void drClose() {
+        glDeleteVertexArrays(VAO);
+        glDeleteBuffers(VBO);
     }
 
     /**

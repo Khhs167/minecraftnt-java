@@ -1,6 +1,5 @@
 package net.minecraftnt.client;
 
-import net.minecraftnt.client.main.ClientMainHandler;
 import net.minecraftnt.client.rendering.Window;
 import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.performance.ThreadedMethodExecutor;
@@ -8,7 +7,6 @@ import net.minecraftnt.util.GameInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -36,12 +34,6 @@ public class Main {
 
             if(args.length > 1)
                 session = args[1];
-
-            LOGGER.info("Starting resource downloading...");
-
-            ThreadDownloadResources threadDownloadResources = new ThreadDownloadResources();
-            threadDownloadResources.run();
-
 
             LOGGER.info("Creating minecraftn't instance");
 

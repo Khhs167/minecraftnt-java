@@ -1,5 +1,5 @@
 package net.minecraftnt.client.ui.fonts;
-import net.minecraftnt.client.main.ClientMainHandler;
+import net.minecraftnt.client.ClientMainHandler;
 import net.minecraftnt.client.rendering.Shader;
 import net.minecraftnt.client.rendering.Texture;
 
@@ -17,12 +17,9 @@ import static org.lwjgl.opengl.GL20.glUniform2f;
 public class Font {
 
     public static final Identifier FONT_DEFAULT = new Identifier("minecraft", "font_default");
-
+    public static Identifier FONT_DEFAULT_TEXTURE = new Identifier("minecraft", "font_default_texture");
     private Map<java.lang.Character, Character> characterMap = new HashMap<>();
-    private Texture texture;
-    public Font(String path){
-        texture = new Texture(path);
-
+    public Font(){
         for (int i = 0; i < Character.FONT_LEN; i++) {
             characterMap.put((char)i, new Character(i));
         }
@@ -43,7 +40,7 @@ public class Font {
     }
 
     public void render(char character, Vector2 pos){
-        texture.use();
+        Texture.use(FONT_DEFAULT_TEXTURE);
         Shader program = Registry.SHADERS.get(Shader.SHADER_FONT);
         program.bind();
         glUniform2f(program.getUniformLocation("screen_pos"), pos.getX(), pos.getY());

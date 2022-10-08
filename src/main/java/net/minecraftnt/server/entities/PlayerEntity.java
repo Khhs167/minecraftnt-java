@@ -1,16 +1,13 @@
 package net.minecraftnt.server.entities;
 
-import net.minecraftnt.client.main.ClientMainHandler;
+import net.minecraftnt.client.ClientMainHandler;
 import net.minecraftnt.client.rendering.Camera;
-import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.entities.special.Pawn;
 import net.minecraftnt.server.physics.ColliderAABB;
 import net.minecraftnt.server.physics.PhysicsSettings;
 import net.minecraftnt.util.*;
 import net.minecraftnt.util.input.KeyboardInput;
 import net.minecraftnt.util.input.MouseInput;
-
-import static net.minecraftnt.server.Minecraft.LOGGER;
 
 public class PlayerEntity extends Pawn  {
 

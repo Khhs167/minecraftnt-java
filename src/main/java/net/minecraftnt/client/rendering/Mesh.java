@@ -1,8 +1,7 @@
 package net.minecraftnt.client.rendering;
 
-import net.minecraftnt.client.main.ClientMainHandler;
+import net.minecraftnt.client.ClientMainHandler;
 import org.lwjgl.system.MemoryUtil;
-import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.util.Transform;
 import net.minecraftnt.util.Vector2;
 import net.minecraftnt.util.Vector3;
@@ -12,7 +11,7 @@ import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL33.*;
 
-public class Mesh {
+public class Mesh implements AutoCloseable {
     private int vao;
     private int vbo;
     private int ebo;
@@ -83,5 +82,12 @@ public class Mesh {
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, triangles.length, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+    }
+
+    @Override
+    public void close()  {
+        glDeleteVertexArrays(vao);
+        glDeleteBuffers(vbo);
+        glDeleteBuffers(ebo);
     }
 }

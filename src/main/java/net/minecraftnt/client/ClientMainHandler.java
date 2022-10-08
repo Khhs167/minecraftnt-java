@@ -1,4 +1,4 @@
-package net.minecraftnt.client.main;
+package net.minecraftnt.client;
 
 import imgui.ImGui;
 import net.minecraftnt.client.rendering.*;
@@ -18,10 +18,7 @@ import net.minecraftnt.util.input.MouseInput;
 import net.minecraftnt.util.registries.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.awaitility.Awaitility;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 
 import static net.minecraftnt.client.rendering.DirectRenderer.*;
@@ -81,6 +78,7 @@ public class ClientMainHandler {
 
     private Mesh placementMesh;
     private Transform placementTransform;
+    private static ThreadDownloadResources threadDownloadResources;
 
     public static void run() {
         new Window().run();
@@ -91,20 +89,36 @@ public class ClientMainHandler {
         placementTransform.location.setY(-placementTransform.location.getY());
     }
 
-    public void loadClientSide(){
+    public void loadResources() {
+
         LOGGER.info("Generating shaders...");
-        Registry.SHADERS.add(Shader.SHADER_BASE, Shader.LoadFromName("default"));
+        Registry.SHADERS.add(Shader.SHADER_BASE, Shader.LoadFromName("default"), true);
 
-        Registry.SHADERS.add(Shader.SHADER_FONT, Shader.LoadFromName("font"));
+        Registry.SHADERS.add(Shader.SHADER_FONT, Shader.LoadFromName("font"), true);
 
-        Registry.SHADERS.add(Shader.SHADER_PLACE, Shader.LoadFromName("placement"));
+        Registry.SHADERS.add(Shader.SHADER_PLACE, Shader.LoadFromName("placement"), true);
 
-        Registry.SHADERS.add(Shader.SHADER_DIRECT, Shader.LoadFromName("direct"));
+        Registry.SHADERS.add(Shader.SHADER_DIRECT, Shader.LoadFromName("direct"), true);
 
-        Registry.TEXTURE_ATLASES.add(TERRAIN_ATLAS_IDENTIFIER, new Texture("assets/terrain_mc.png"));
-        Registry.TEXTURE_ATLASES.add(new Identifier("minecraft", "test"), new Texture("assets/test.png"));
+        Registry.TEXTURES.add(TERRAIN_ATLAS_IDENTIFIER, Texture.loadTexture("assets/terrain_mc.png"), true);
+        Registry.TEXTURES.add(new Identifier("minecraft", "test"), Texture.loadTexture("assets/test.png"), true);
 
-        Registry.FONTS.add(Font.FONT_DEFAULT, new Font("assets/minecraftia.png"));
+        Registry.TEXTURES.add(Font.FONT_DEFAULT_TEXTURE, Texture.loadTexture("assets/minecraftia.png"), true);
+
+        Registry.FONTS.add(Font.FONT_DEFAULT, new Font(), true);
+    }
+
+    public void loadClientSide(){
+
+        LOGGER.info("Starting resource downloading...");
+
+        threadDownloadResources = new ThreadDownloadResources();
+        threadDownloadResources.start();
+
+
+        Registry.TEXTURES.add(Texture.TEXTURE_NULL, Texture.loadTexture("assets/null.png"));
+
+        loadResources();
 
         currentPawn = (PlayerEntity) Minecraft.getInstance().getWorld().createEntity(new Vector3(0, 80, 0), PlayerEntity.IDENTIFIER);
 
@@ -155,6 +169,9 @@ public class ClientMainHandler {
     }
 
     public void update(){
+
+        threadDownloadResources.tryReload();
+
         if(currentPawn != null)
             currentPawn.translateCamera(camera);
 
@@ -178,7 +195,7 @@ public class ClientMainHandler {
     public void render(){
 
 
-        Registry.TEXTURE_ATLASES.get(TERRAIN_ATLAS_IDENTIFIER).use();
+        Texture.use(TERRAIN_ATLAS_IDENTIFIER);
         Minecraft.getInstance().getWorld().render();
         placementMesh.render(Registry.SHADERS.get(Shader.SHADER_PLACE), placementTransform);
 

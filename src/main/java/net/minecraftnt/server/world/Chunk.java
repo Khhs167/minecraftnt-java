@@ -1,6 +1,6 @@
 package net.minecraftnt.server.world;
 
-import net.minecraftnt.client.main.ClientMainHandler;
+import net.minecraftnt.client.ClientMainHandler;
 import net.minecraftnt.client.rendering.Mesh;
 import net.minecraftnt.client.rendering.Shader;
 import net.minecraftnt.client.voxels.VoxelInformation;
@@ -12,7 +12,7 @@ import net.minecraftnt.util.registries.Registry;
 import java.util.*;
 
 import static net.minecraftnt.server.Minecraft.LOGGER;
-import static net.minecraftnt.client.main.ClientMainHandler.TERRAIN_ATLAS_TEXTURE_SIZE;
+import static net.minecraftnt.client.ClientMainHandler.TERRAIN_ATLAS_TEXTURE_SIZE;
 
 public class Chunk {
     public static final int CHUNK_WIDTH  = 16;

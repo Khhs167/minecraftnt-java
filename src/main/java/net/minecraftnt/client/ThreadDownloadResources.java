@@ -11,7 +11,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -28,21 +27,38 @@ public class ThreadDownloadResources extends Thread {
 
     private static final String ASSET_URL = "https://openability.tech/jimmster/minecraftnt/assets/";
 
+    private boolean needsReload;
+
     public ThreadDownloadResources() {
         setName("ResourceDownloadThread");
     }
 
+    public void tryReload() {
+        if(needsReload)
+            ClientMainHandler.getInstance().loadResources();
+        needsReload = false;
+    }
+
     @Override
     public void run() {
+        needsReload = false;
 
         LOGGER.info("Pinging {} to check for internet connection", PING_URL);
         if(!netIsAvailable()){
             LOGGER.warn("No internet connection is available! No resources will be downloaded!\n");
         }
 
+        try {
+            Thread.sleep(5000, 0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         LOGGER.info("Starting download...");
 
         readAndDownloadListing(ASSET_URL);
+
+        needsReload = true;
 
     }
 
@@ -154,9 +170,10 @@ public class ThreadDownloadResources extends Thread {
                     }
                 } else {
 
-                    URL downloadURL = new URL(new URL(indexURL), name);
-
-                    downloadAndSaveResource(downloadURL, size, resourceFile);
+                    if(!resourceFile.exists() || Files.size(resourceFile.toPath()) != size) {
+                        URL downloadURL = new URL(new URL(indexURL), name);
+                        downloadAndSaveResource(downloadURL, size, resourceFile);
+                    }
                 }
 
             }

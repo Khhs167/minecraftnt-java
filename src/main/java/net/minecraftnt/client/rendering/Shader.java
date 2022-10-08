@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL33.*;
 
-public class Shader {
+public class Shader implements AutoCloseable{
 
     public static final Identifier SHADER_BASE = new Identifier("minecraft", "shader_base");
     public static final Identifier SHADER_PLACE = new Identifier("minecraft", "shader_place");
@@ -83,5 +83,11 @@ public class Shader {
             uniforms.put(name, loc);
         }
         return uniforms.get(name);
+    }
+
+
+    @Override
+    public void close()  {
+        glDeleteProgram(handle);
     }
 }

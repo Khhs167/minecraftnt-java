@@ -1,8 +1,7 @@
 package net.minecraftnt.client.rendering;
 
-import net.minecraftnt.client.main.ClientMainHandler;
+import net.minecraftnt.client.ClientMainHandler;
 import org.joml.Matrix4f;
-import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.util.Transform;
 import net.minecraftnt.util.Vector3;
 

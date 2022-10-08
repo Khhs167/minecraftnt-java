@@ -4,16 +4,36 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
+import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.registries.Registry;
 import org.lwjgl.system.MemoryUtil;
 import net.minecraftnt.util.resources.Resources;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.glDeleteProgram;
 
-public class Texture {
+public class Texture implements AutoCloseable {
+
+    public static final Identifier TEXTURE_NULL = new Identifier("minecraft", "null");
+
     private int id;
-    public Texture(String path)  {
+
+    public int getId() {
+        return id;
+    }
+
+    public static Texture loadTexture(String path){
+
+        if(!Resources.fileExists(path))
+            return null;
+
+        return new Texture(path);
+    }
+
+    private Texture(String path)  {
 
         id = glGenTextures();
+
         glBindTexture(GL_TEXTURE_2D, id);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -32,9 +52,28 @@ public class Texture {
             e.printStackTrace();
         }
 
+
+    }
+
+    public static void use(Identifier identifier) {
+
+        Texture texture = Registry.TEXTURES.get(identifier);
+
+        if(texture == null) {
+            texture = Registry.TEXTURES.get(TEXTURE_NULL);
+        }
+
+        texture.use();
+
+
     }
 
     public void use(){
         glBindTexture(GL_TEXTURE_2D, id);
+    }
+
+    @Override
+    public void close()  {
+        glDeleteTextures(id);
     }
 }

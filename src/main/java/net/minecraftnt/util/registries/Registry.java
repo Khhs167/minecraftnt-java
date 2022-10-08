@@ -15,16 +15,24 @@ public class Registry<T>{
         map = new HashMap<>();
     }
 
-    public T add(Identifier identifier, T registrable){
-        if(map.containsKey(identifier))
+    public T add(Identifier identifier, T registrable, boolean override){
+        if(map.containsKey(identifier) && !override)
             return registrable;
         map.put(identifier, registrable);
         return registrable;
     }
 
+    public T add(Identifier identifier, T registrable){
+        return add(identifier, registrable, false);
+    }
+
     public Identifier addIdentifier(String namespace, String name, T registrable){
+        return addIdentifier(namespace, name, registrable, false);
+    }
+
+    public Identifier addIdentifier(String namespace, String name, T registrable, boolean override){
         Identifier identifier = new Identifier(namespace, name);
-        add(identifier, registrable);
+        add(identifier, registrable, override);
         return identifier;
     }
 
@@ -34,7 +42,7 @@ public class Registry<T>{
 
     public static final Registry<IRWorldGenerator> WORLD_GENERATORS = new Registry<>();
     public static final Registry<Block> BLOCKS = new Registry<>();
-    public static final Registry<Texture> TEXTURE_ATLASES = new Registry<>();
+    public static final Registry<Texture> TEXTURES = new Registry<>();
     public static final Registry<Class<? extends Entity>> ENTITIES = new Registry<>();
     public static final Registry<Font> FONTS = new Registry<>();
     public static final Registry<Shader> SHADERS = new Registry<>();
