@@ -1,5 +1,7 @@
 package net.minecraftnt.util.resources;
 
+import net.minecraftnt.util.GameInfo;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -18,7 +20,7 @@ public class FolderResources {
     }
 
     public static boolean fileExists(String name){
-        return new File("resources/" + name).exists();
+        return new File(GameInfo.getResourceLocation(name)).exists();
     }
 
     public static String loadResourceAsString(String name){
@@ -36,7 +38,7 @@ public class FolderResources {
             return null;
 
         try {
-            return new FileInputStream("resources/" + fileName);
+            return new FileInputStream(GameInfo.getResourceLocation(fileName));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

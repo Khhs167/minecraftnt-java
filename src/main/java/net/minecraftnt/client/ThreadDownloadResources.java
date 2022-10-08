@@ -1,5 +1,6 @@
 package net.minecraftnt.client;
 
+import net.minecraftnt.util.GameInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -118,19 +119,14 @@ public class ThreadDownloadResources extends Thread {
 
                 for(int j = 0; j < fileInfoNodes.getLength(); j++){
 
-                    switch (fileInfoNodes.item(j).getNodeName()){
-                        case "Type":
-                            type = fileInfoNodes.item(j).getTextContent();
-                            break;
-                        case "Size":
-                            size = Long.parseLong(fileInfoNodes.item(j).getTextContent());
-                            break;
-                        case "Name":
-                            name = fileInfoNodes.item(j).getTextContent();
-                            break;
-                        default:
+                    switch (fileInfoNodes.item(j).getNodeName()) {
+                        case "Type" -> type = fileInfoNodes.item(j).getTextContent();
+                        case "Size" -> size = Long.parseLong(fileInfoNodes.item(j).getTextContent());
+                        case "Name" -> name = fileInfoNodes.item(j).getTextContent();
+                        default -> {
                             LOGGER.fatal("Invalid file listing");
                             throw new RuntimeException("Invalid File Listing: expected 'Type', 'Size' or 'Name' child node, got '" + node.getNodeName() + "'!");
+                        }
                     }
 
                 }
@@ -155,7 +151,7 @@ public class ThreadDownloadResources extends Thread {
                     throw new RuntimeException("Invalid File Listing: expected 0> size, got " + size + "!(-1 is default)");
                 }
 
-                File resourceFile = new File("resources/" + name);
+                File resourceFile = new File(GameInfo.getResourceLocation(name));
 
                 if(resourceFile.isDirectory() && type.equals("directory") && resourceFile.exists())
                     continue;
