@@ -165,15 +165,6 @@ public class ClientMainHandler {
         placementTransform = new Transform(Vector3.zero());
         placementTransform.scale = Vector3.one().multiply(1.0f + BLOCK_HIGHLIGHT_OFFSET * 2);
 
-        LOGGER.info("Waiting for world...");
-        while (!Minecraft.getInstance().getWorld().isGenerated()){
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         Minecraft.getInstance().getWorld().initGraphics();
 
     }
