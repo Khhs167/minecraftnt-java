@@ -1,0 +1,17 @@
+[13:39:21] [main/INFO]: Starting Minecraftn't 1.0.0
+[13:39:21] [main/INFO]: Creating minecraftn't instance
+[13:39:21] [main/INFO]: Running game
+[13:39:21] [main/INFO]: Initializing LWJGL 3.3.1 SNAPSHOT
+[13:39:22] [main/INFO]: Initializing DirectRenderer context
+[13:39:22] [main/INFO]: Registering world generations... 
+[13:39:22] [main/INFO]: Generating flat world
+[13:39:23] [main/INFO]: Creating thread..
+[13:39:23] [TheadedMethodExecutor_1/INFO]: Starting thread..
+[13:39:23] [main/INFO]: Finished generation!
+[13:39:23] [main/INFO]: Starting resource downloading...
+[13:39:23] [main/INFO]: Generating shaders...
+[13:39:23] [ResourceDownloadThread/INFO]: Pinging https://www.google.com to check for internet connection
+[13:39:23] [main/INFO]: Waiting for world...
+[13:39:25] [main/INFO]: Halting ThreadedMethodExecutor!
+[13:39:25] [main/INFO]: Halting...
+[13:39:25] [main/INFO]: Goodbye!

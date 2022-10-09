@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'io.spring.dependency-management' version '1.0.1.RELEASE'
+    id 'application'
 }
 
 group 'net.minecraftn'
@@ -23,6 +25,10 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+application {
+    mainClass.set('net.minecraftnt.launcher.Main')
 }
 
 test {
