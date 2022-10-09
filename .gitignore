@@ -4,3 +4,5 @@
 /.gradle
 /.idea
 /imgui.ini
+/gradle
+/gradle/*
