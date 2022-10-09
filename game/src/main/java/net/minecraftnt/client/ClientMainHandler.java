@@ -79,8 +79,15 @@ public class ClientMainHandler {
     private Mesh placementMesh;
     private Transform placementTransform;
     private static ThreadDownloadResources threadDownloadResources;
+    private static Session session;
 
-    public static void run() {
+    public static void run(Session session) {
+        LOGGER.info("Launching client with username '{}', session id '{}'", session.getUsername(), session.getId());
+        ClientMainHandler.session = session;
+
+        if(!session.validate())
+            LOGGER.error("Session is not valid! Expect reduced functionality!");
+
         new Window().run();
     }
 
@@ -262,6 +269,30 @@ public class ClientMainHandler {
         // ImGUI debug info
         if(ImGui.begin("Debug")){
             ImGui.text("Entities: " + Minecraft.getInstance().getWorld().getEntityCount());
+
+
+            if(ImGui.collapsingHeader("Resources")) {
+                ImGui.indent();
+
+                if(ImGui.button("Reload resources")){
+                    loadResources();
+                }
+
+                boolean disabledDownload = threadDownloadResources.isAlive();
+                if (disabledDownload)
+                    ImGui.beginDisabled();
+
+                if (ImGui.button("Download resources")) {
+                    threadDownloadResources = new ThreadDownloadResources();
+                    threadDownloadResources.start();
+                }
+
+                if (disabledDownload)
+                    ImGui.endDisabled();
+
+                ImGui.unindent();
+
+            }
 
             if(ImGui.collapsingHeader("Rendering")) {
                 ImGui.indent();

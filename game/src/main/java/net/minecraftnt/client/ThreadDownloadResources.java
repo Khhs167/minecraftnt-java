@@ -49,12 +49,6 @@ public class ThreadDownloadResources extends Thread {
             LOGGER.warn("No internet connection is available! No resources will be downloaded!\n");
         }
 
-        try {
-            Thread.sleep(5000, 0);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         LOGGER.info("Starting download...");
 
         readAndDownloadListing(ASSET_URL);
@@ -153,19 +147,14 @@ public class ThreadDownloadResources extends Thread {
 
                 File resourceFile = new File(GameInfo.getResourceLocation(name));
 
-                if(resourceFile.isDirectory() && type.equals("directory") && resourceFile.exists())
-                    continue;
-
-                if(resourceFile.isFile() && type.equals("file") && resourceFile.exists())
-                    continue;
-
                 if(type.equals("directory")){
-                    if(!resourceFile.mkdirs()){
-                        LOGGER.fatal("Could not create directory " + name);
-                        throw new RuntimeException("Directory creation failed!");
+                    if(!resourceFile.exists()) {
+                        if (!resourceFile.mkdirs()) {
+                            LOGGER.fatal("Could not create directory " + name);
+                            throw new RuntimeException("Directory creation failed!");
+                        }
                     }
                 } else {
-
                     if(!resourceFile.exists() || Files.size(resourceFile.toPath()) != size) {
                         URL downloadURL = new URL(new URL(indexURL), name);
                         downloadAndSaveResource(downloadURL, size, resourceFile);
@@ -192,7 +181,7 @@ public class ThreadDownloadResources extends Thread {
 
             Path outPath = Paths.get(output.toURI());
 
-            LOGGER.info("Downloading {} ({}) [{} byte]", output, url, size);
+            LOGGER.info("Downloading {} ({}) [{} byte]", Paths.get(GameInfo.getResourceDirectory()).relativize(outPath), url, size);
 
             InputStream in = url.openStream();
             Files.copy(in, outPath, StandardCopyOption.REPLACE_EXISTING);

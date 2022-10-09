@@ -1,4 +1,5 @@
 package net.minecraftnt.server;
+import net.minecraftnt.client.Session;
 import net.minecraftnt.server.entities.PlayerEntity;
 import net.minecraftnt.server.world.World;
 import net.minecraftnt.server.world.generators.FlatWorldGen;
@@ -21,11 +22,16 @@ public class Minecraft {
     }
 
     public static Logger LOGGER = LogManager.getLogger(Minecraft.class);
+    private Session session;
 
 
     public static void tryCreate(){
         if(theMinecraft == null)
             theMinecraft = new Minecraft();
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     private Map<Identifier, World> worlds = new HashMap<Identifier, World>();

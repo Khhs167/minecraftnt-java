@@ -11,8 +11,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public class Main {
-    private long window;
-
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
@@ -41,7 +39,7 @@ public class Main {
             Minecraft.tryCreate();
 
             LOGGER.info("Running game");
-            ClientMainHandler.run();
+            ClientMainHandler.run(new Session(user, session));
 
             LOGGER.info("Halting ThreadedMethodExecutor!");
             ThreadedMethodExecutor.getExecutor().halt();
