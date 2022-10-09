@@ -123,6 +123,8 @@ public class Window {
         imGuiGlfw.init(handle, true);
         imGuiGl3.init(glslVersion);
 
+        ImGui.getIO().setIniFilename(GameInfo.getGameDirectory() + "/imgui.ini");
+
         DirectRenderer.drInitialize(); // Init DirectRenderer
 
     }

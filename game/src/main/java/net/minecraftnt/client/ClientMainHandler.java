@@ -107,7 +107,7 @@ public class ClientMainHandler {
 
         Registry.SHADERS.add(Shader.SHADER_DIRECT, Shader.LoadFromName("direct"), true);
 
-        Registry.TEXTURES.add(TERRAIN_ATLAS_IDENTIFIER, Texture.loadTexture("assets/terrain_mc.png"), true);
+        Registry.TEXTURES.add(TERRAIN_ATLAS_IDENTIFIER, Texture.loadTexture("assets/terrain.png"), true);
         Registry.TEXTURES.add(new Identifier("minecraft", "test"), Texture.loadTexture("assets/test.png"), true);
 
         Registry.TEXTURES.add(Font.FONT_DEFAULT_TEXTURE, Texture.loadTexture("assets/minecraftia.png"), true);
@@ -372,8 +372,8 @@ public class ClientMainHandler {
                 setGuiScale(scale[0]);
             }
 
-            ImGui.end();
         }
+        ImGui.end();
 
     }
 

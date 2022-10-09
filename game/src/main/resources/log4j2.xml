@@ -4,7 +4,7 @@
         <Console name="SysOut" target="SYSTEM_OUT">
             <PatternLayout pattern="%highlight{[%d{HH:mm:ss}] [%t/%level]: %msg%n}{FATAL=bright red, ERROR=red, INFO=bright_white, DEBUG=bright white, TRACE=bright blue}" />
         </Console>
-        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.zip">
+        <RollingRandomAccessFile name="File" fileName="${sys:user.home}/.khhs/minecraft/logs/latest.log" filePattern="${sys:user.home}/.khhs/minecraft/logs/%d{yyyy-MM-dd}-%i.log.zip">
             <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
