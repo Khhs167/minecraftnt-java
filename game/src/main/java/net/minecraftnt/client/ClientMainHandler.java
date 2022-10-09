@@ -91,6 +91,10 @@ public class ClientMainHandler {
         new Window().run();
     }
 
+    public static Session getSession() {
+        return session;
+    }
+
     public void setPlacementPosition(Vector3 pos){
         placementTransform.location = pos.clone();
         placementTransform.location.setY(-placementTransform.location.getY());
@@ -108,9 +112,8 @@ public class ClientMainHandler {
         Registry.SHADERS.add(Shader.SHADER_DIRECT, Shader.LoadFromName("direct"), true);
 
         Registry.TEXTURES.add(TERRAIN_ATLAS_IDENTIFIER, Texture.loadTexture("assets/terrain.png"), true);
-        Registry.TEXTURES.add(new Identifier("minecraft", "test"), Texture.loadTexture("assets/test.png"), true);
 
-        Registry.TEXTURES.add(Font.FONT_DEFAULT_TEXTURE, Texture.loadTexture("assets/minecraftia.png"), true);
+        Registry.TEXTURES.add(Font.FONT_DEFAULT_TEXTURE, Texture.loadTexture("assets/font.png"), true);
 
         Registry.FONTS.add(Font.FONT_DEFAULT, new Font(), true);
     }
@@ -133,7 +136,7 @@ public class ClientMainHandler {
 
         ArrayList<Vector3> vertices = new ArrayList<>();
         ArrayList<Vector2> uvs = new ArrayList<>();
-        ArrayList<Integer> triangles = new ArrayList<Integer>();
+        ArrayList<Integer> triangles = new ArrayList<>();
 
         int vertexIndex = 0;
         Vector3 pos = new Vector3(0, 0, 0);
@@ -383,7 +386,7 @@ public class ClientMainHandler {
         window = newWindow;
     }
 
-    private Camera camera;
+    private final Camera camera;
 
     public Camera getCamera() {
         return camera;
