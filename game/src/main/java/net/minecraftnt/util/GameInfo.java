@@ -4,7 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class GameInfo {
-    public static final Version version = new Version(1, 1, 0);
+    public static final Version version = new Version(1, 2, 0);
 
     public static String getGameDirectory() {
         String home_dir = System.getProperty("user.home");
