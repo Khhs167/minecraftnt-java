@@ -1,5 +1,6 @@
 package net.minecraftnt.client.rendering;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
@@ -10,7 +11,6 @@ import org.lwjgl.system.MemoryUtil;
 import net.minecraftnt.util.resources.Resources;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.glDeleteProgram;
 
 public class Texture implements AutoCloseable {
 
@@ -55,6 +55,19 @@ public class Texture implements AutoCloseable {
 
     }
 
+    public static RawTexture loadData(String resource){
+        try {
+            InputStream stream = Resources.loadResourceAsStream(resource);
+            PNGDecoder decoder = new PNGDecoder(stream);
+            ByteBuffer buffer = MemoryUtil.memAlloc(4 * decoder.getHeight() * decoder.getWidth());
+            decoder.decode(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+            buffer.flip();
+            return new RawTexture(buffer, decoder.getWidth(), decoder.getHeight());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void use(Identifier identifier) {
 
         Texture texture = Registry.TEXTURES.get(identifier);
@@ -75,5 +88,17 @@ public class Texture implements AutoCloseable {
     @Override
     public void close()  {
         glDeleteTextures(id);
+    }
+
+    public static class RawTexture {
+        public final ByteBuffer data;
+        public final int width;
+        public final int height;
+
+        public RawTexture(ByteBuffer data, int width, int height) {
+            this.data = data;
+            this.width = width;
+            this.height = height;
+        }
     }
 }

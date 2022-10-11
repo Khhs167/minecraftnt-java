@@ -43,11 +43,7 @@ public class PhysicsBody {
 
     public void updateBody(){
         if(doSimulate) {
-
-            if (collider != null) {
-                if (collider.shouldConstrain)
-                    collider.constrain(getTransform().location);
-            }
+            constrain();
         }
 
         transform.location = transform.location.add(velocity.multiply(entity.getDeltaTime()));
@@ -69,5 +65,19 @@ public class PhysicsBody {
 
     public Vector3 getVelocity() {
         return velocity;
+    }
+
+    public Collider getCollider() {
+        return collider;
+    }
+
+    public void constrain(){
+        if (collider != null) {
+            if (collider.shouldConstrain()) {
+                ConstrainResult result = collider.constrain(getTransform().location, velocity);
+                getTransform().location = result.position;
+                velocity = result.velocity;
+            }
+        }
     }
 }

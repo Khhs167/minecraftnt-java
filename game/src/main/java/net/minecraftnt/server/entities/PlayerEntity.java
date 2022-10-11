@@ -24,7 +24,7 @@ public class PlayerEntity extends Pawn  {
 
     public PlayerEntity(Vector3 pos) {
         super(pos);
-        addPhysicsBody().setCollider(new ColliderAABB(Vector3.zero(), new Vector3(1, 1.8f, 1))).setDoSimulate(false);
+        addPhysicsBody().setCollider(new ColliderAABB(Vector3.zero(), new Vector3(1, 1.8f, 1)));
         footCollider = new ColliderAABB(Vector3.zero().addX(0.1f).addZ(0.1f).addY(-0.1f), new Vector3(0.8f, 0.2f, 0.8f));
     }
 
@@ -34,18 +34,7 @@ public class PlayerEntity extends Pawn  {
         KeyboardInput keyboardInput = ClientMainHandler.getKeyboardInput();
 
         getPhysicsBody().addVelocity(PhysicsSettings.gravity.multiply(getDeltaTime()));
-        super.update();
 
-        boolean hasDoneYUpdate = false;
-        while (footCollider.colliding(getTransform().location)) {
-            getTransform().location = getTransform().location.addY(0.1f);
-            getPhysicsBody().setVelocity(getPhysicsBody().getVelocity().setY(0));
-            hasDoneYUpdate = true;
-        }
-
-        if(hasDoneYUpdate){
-            getTransform().location.setY((float) Math.floor(getTransform().location.getY()));
-        }
 
         if(footCollider.colliding(getTransform().location) && keyboardInput.isKeyDown(KeyboardInput.KEY_JUMP)){
             getPhysicsBody().addVelocity(Vector3.up().multiply(jumpForce));
@@ -73,14 +62,8 @@ public class PlayerEntity extends Pawn  {
 
         getPhysicsBody().getVelocity().setX(hVel.getX());
         getPhysicsBody().getVelocity().setZ(hVel.getZ());
-        if(getPhysicsBody().colliding(getTransform().location.add(hVel.multiply(getDeltaTime())))) {
-            getTransform().location = getTransform().location.add(hVel.multiply(getDeltaTime()));
-            final Vector3 velocity = hVel.multiply(getDeltaTime());
-            getPhysicsBody().setVelocity(Vector3.zero());
-            while (getPhysicsBody().colliding(getTransform().location)) {
-                getTransform().location = getTransform().location.add(velocity.negate().multiply(1f));
-            }
-        }
+
+        super.update();
 
         mouseMove();
 

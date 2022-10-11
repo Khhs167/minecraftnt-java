@@ -7,7 +7,7 @@ public class Resources {
 
         byte[] folderBytes = FolderResources.loadResourceAsBytes(name);
         if(folderBytes != null)
-            return folderBytes;
+           return folderBytes;
 
         byte[] classBytes = ClassResources.loadResourceAsBytes(name);
         if(classBytes != null)

@@ -16,8 +16,32 @@ public class ColliderAABB implements Collider {
     }
 
     @Override
-    public void constrain(Vector3 position) {
+    public boolean shouldConstrain() {
+        return true;
+    }
 
+    @Override
+    public ConstrainResult constrain(Vector3 position, Vector3 velocity) {
+        if(colliding(position)){
+            position = position.sub(velocity.multiply(Minecraft.getInstance().getDeltaTime()));
+            Vector3 direction = velocity.normalize();
+
+            final float step_size = 0.01f;
+            final int max_steps = 200;
+
+            int c = 0;
+
+            while(c < max_steps && !colliding(position)){
+
+                position = position.add(direction.multiply(step_size));
+
+                c++;
+            }
+            velocity = Vector3.zero();
+
+        }
+
+        return new ConstrainResult(position, velocity);
     }
 
     @Override

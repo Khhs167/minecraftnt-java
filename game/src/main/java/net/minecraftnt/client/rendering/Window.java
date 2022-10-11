@@ -9,6 +9,7 @@ import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.util.GameInfo;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
 import net.minecraftnt.util.Vector2;
 import net.minecraftnt.util.Vector2I;
@@ -100,6 +101,13 @@ public class Window {
         glfwSetMouseButtonCallback(handle, this::mouseClickCallback);
 
         glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        GLFWImage iconImage = GLFWImage.malloc();
+        GLFWImage.Buffer iconBuffer = GLFWImage.malloc(1);
+        Texture.RawTexture iconTexture = Texture.loadData("assets/icon.png");
+        iconImage.set(iconTexture.width, iconTexture.height, iconTexture.data);
+        iconBuffer.put(0, iconImage);
+        glfwSetWindowIcon(handle, iconBuffer);
 
         glfwMakeContextCurrent(handle);
         glfwSwapInterval(1);

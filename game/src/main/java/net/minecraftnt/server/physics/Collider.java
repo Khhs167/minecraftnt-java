@@ -4,8 +4,11 @@ import net.minecraftnt.util.Vector3;
 
 public interface Collider {
 
-    boolean shouldConstrain = false;
+    default boolean shouldConstrain() {
+        return false;
+    }
 
-    void constrain(Vector3 position);
+    ConstrainResult constrain(Vector3 position, Vector3 velocity);
     boolean colliding(Vector3 position);
+
 }
