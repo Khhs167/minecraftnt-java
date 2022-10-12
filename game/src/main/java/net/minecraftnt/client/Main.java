@@ -17,13 +17,12 @@ public class Main {
 
         Thread.currentThread().setName("Main");
 
-        Window window = null;
         try {
 
             LOGGER.info("Starting Minecraftn't {}", GameInfo.version.toString());
 
 
-            String user = "";
+            String user;
             String session = "-";
 
             user = "__unregistered__user__";
@@ -47,8 +46,8 @@ public class Main {
             ThreadedMethodExecutor.getExecutor().halt();
             LOGGER.info("Goodbye!");
         } catch (Exception e){
-            if(window != null)
-                window.close();
+
+            ClientMainHandler.getInstance().getWindow().close();
 
             StringWriter stringWriter = new StringWriter();
             PrintWriter stackTraceStream = new PrintWriter(stringWriter);
