@@ -7,5 +7,3 @@
 /gradle
 /gradle/*
 hs_err_*.log
-.fleet
-!.fleet/run.json
