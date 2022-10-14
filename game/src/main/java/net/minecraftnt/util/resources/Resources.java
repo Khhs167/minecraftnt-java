@@ -1,13 +1,22 @@
 package net.minecraftnt.util.resources;
 
+import net.minecraftnt.util.GameInfo;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class Resources {
     public static byte[] loadResourceAsBytes(String name){
 
+        byte[] customBytes = CustomResources.loadResourceAsBytes(name);
+        if(customBytes != null)
+            return customBytes;
+
         byte[] folderBytes = FolderResources.loadResourceAsBytes(name);
         if(folderBytes != null)
-           return folderBytes;
+            return folderBytes;
 
         byte[] classBytes = ClassResources.loadResourceAsBytes(name);
         if(classBytes != null)
@@ -17,6 +26,9 @@ public class Resources {
     }
 
     public static boolean fileExists(String name){
+
+        if(CustomResources.fileExists(name))
+            return true;
 
         if(FolderResources.fileExists(name))
             return true;
@@ -28,6 +40,11 @@ public class Resources {
     }
 
     public static String loadResourceAsString(String name){
+
+
+        String customString = CustomResources.loadResourceAsString(name);
+        if(customString != null)
+            return customString;
 
         String folderString = FolderResources.loadResourceAsString(name);
         if(folderString != null)
@@ -42,7 +59,11 @@ public class Resources {
 
     public static InputStream loadResourceAsStream(String fileName) {
 
-        InputStream folderStream= FolderResources.loadResourceAsStream(fileName);
+        InputStream customStream = CustomResources.loadResourceAsStream(fileName);
+        if(customStream != null)
+            return customStream;
+
+        InputStream folderStream = FolderResources.loadResourceAsStream(fileName);
         if(folderStream != null)
             return folderStream;
 

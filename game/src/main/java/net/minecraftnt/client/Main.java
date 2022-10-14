@@ -4,11 +4,19 @@ import net.minecraftnt.client.rendering.Window;
 import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.performance.ThreadedMethodExecutor;
 import net.minecraftnt.util.GameInfo;
+import net.minecraftnt.util.resources.ClassResources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.util.FileUtils;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.util.Objects;
 
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
@@ -18,6 +26,10 @@ public class Main {
         Thread.currentThread().setName("Main");
 
         try {
+
+            Files.writeString(Path.of(GameInfo.getGameDirectory(), "README.TXT"), Objects.requireNonNull(ClassResources.loadResourceAsString("assets/GAME_DIR_README.txt")));
+
+
 
             LOGGER.info("Starting Minecraftn't {}", GameInfo.version.toString());
 

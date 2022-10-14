@@ -1,6 +1,9 @@
 package net.minecraftnt.client;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import imgui.ImGui;
+import imgui.type.ImString;
 import net.minecraftnt.client.rendering.*;
 import net.minecraftnt.client.ui.fonts.Font;
 import net.minecraftnt.client.voxels.VoxelInformation;
@@ -9,13 +12,13 @@ import net.minecraftnt.server.entities.PlayerEntity;
 import net.minecraftnt.server.entities.special.Pawn;
 import net.minecraftnt.server.physics.PhysicsBody;
 import net.minecraftnt.server.world.Chunk;
-import net.minecraftnt.util.Identifier;
-import net.minecraftnt.util.Transform;
-import net.minecraftnt.util.Vector2;
-import net.minecraftnt.util.Vector3;
+import net.minecraftnt.util.*;
 import net.minecraftnt.util.input.KeyboardInput;
 import net.minecraftnt.util.input.MouseInput;
 import net.minecraftnt.util.registries.Registry;
+import net.minecraftnt.util.resources.CustomResources;
+import net.minecraftnt.util.resources.PackInfo;
+import net.minecraftnt.util.resources.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,6 +83,10 @@ public class ClientMainHandler {
     private Transform placementTransform;
     private static ThreadDownloadResources threadDownloadResources;
     private static Session session;
+    private static PackInfo currentPackInfo;
+
+    public static final Gson GSON = new GsonBuilder().create();
+
 
     public static void run(Session session) {
         LOGGER.info("Launching client with username '{}', session id '{}'", session.getUsername(), session.getId());
@@ -93,6 +100,10 @@ public class ClientMainHandler {
 
     public static Session getSession() {
         return session;
+    }
+
+    public static PackInfo getCurrentPackInfo() {
+        return currentPackInfo;
     }
 
     public void setPlacementPosition(Vector3 pos){
@@ -115,7 +126,12 @@ public class ClientMainHandler {
 
         Registry.TEXTURES.add(Font.FONT_DEFAULT_TEXTURE, Texture.loadTexture("assets/font.png"), true);
 
+        Registry.TEXTURES.add(PackInfo.PACK_IMAGE, Texture.loadTexture("pack.png"), true);
+
         Registry.FONTS.add(Font.FONT_DEFAULT, new Font(), true);
+
+        currentPackInfo = GSON.fromJson(Resources.loadResourceAsString("pack.json"), PackInfo.class);
+
     }
 
     public void loadClientSide(){
@@ -283,6 +299,27 @@ public class ClientMainHandler {
 
                 if (disabledDownload)
                     ImGui.endDisabled();
+
+                ImString customPackName = new ImString();
+                customPackName.set(CustomResources.getResourcePack());
+
+                if(ImGui.inputText("Custom pack", customPackName)) {
+                    CustomResources.setResourcePack(customPackName.get());
+                }
+
+                if(ImGui.collapsingHeader("Current Info")) {
+                    ImGui.indent();
+
+                    ImGui.image(Texture.get(PackInfo.PACK_IMAGE).getId(), 128, 128);
+
+                    ImGui.text(currentPackInfo.name);
+                    ImGui.newLine();
+                    ImGui.text(currentPackInfo.description);
+                    ImGui.newLine();
+                    ImGui.text("Version: " + currentPackInfo.pack_version);
+
+                    ImGui.unindent();
+                }
 
                 ImGui.unindent();
 

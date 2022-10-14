@@ -27,10 +27,10 @@ public class Texture implements AutoCloseable {
         if(!Resources.fileExists(path))
             return null;
 
-        return new Texture(path);
+        return new Texture(loadData(path));
     }
 
-    private Texture(String path)  {
+    private Texture(RawTexture texture)  {
 
         id = glGenTextures();
 
@@ -40,14 +40,10 @@ public class Texture implements AutoCloseable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        InputStream stream = Resources.loadResourceAsStream(path);
 
         try {
-            PNGDecoder decoder = new PNGDecoder(stream);
-            ByteBuffer buffer = MemoryUtil.memAlloc(4 * decoder.getHeight() * decoder.getWidth());
-            decoder.decode(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
-            buffer.flip();
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, decoder.getWidth(), decoder.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -78,6 +74,18 @@ public class Texture implements AutoCloseable {
 
         texture.use();
 
+
+    }
+
+    public static Texture get(Identifier identifier) {
+
+        Texture texture = Registry.TEXTURES.get(identifier);
+
+        if(texture == null) {
+            texture = Registry.TEXTURES.get(TEXTURE_NULL);
+        }
+
+        return texture;
 
     }
 

@@ -35,8 +35,21 @@ public class PlayerEntity extends Pawn  {
 
         getPhysicsBody().addVelocity(PhysicsSettings.gravity.multiply(getDeltaTime()));
 
+        boolean hasMovedCollision = false;
 
-        if(footCollider.colliding(getTransform().location) && keyboardInput.isKeyDown(KeyboardInput.KEY_JUMP)){
+        if(footCollider.colliding(getTransform().location.add(getPhysicsBody().getVelocity().onlyY().multiply(getDeltaTime())))){
+
+            getTransform().location.add(getPhysicsBody().getVelocity().onlyY().multiply(getDeltaTime()));
+            getTransform().location.add(Vector3.up().multiply(0.01f));
+
+            getPhysicsBody().addVelocity(getPhysicsBody().getVelocity().onlyY().negate());
+
+            hasMovedCollision = true;
+
+        }
+
+
+        if((hasMovedCollision || footCollider.colliding(getTransform().location)) && keyboardInput.isKeyDown(KeyboardInput.KEY_JUMP)){
             getPhysicsBody().addVelocity(Vector3.up().multiply(jumpForce));
             getTransform().location = getTransform().location.addY(0.1f);
         }

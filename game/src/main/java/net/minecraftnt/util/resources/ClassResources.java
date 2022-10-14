@@ -1,10 +1,15 @@
 package net.minecraftnt.util.resources;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class ClassResources {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static InputStream loadResourceAsStream(String fileName) {
 
@@ -14,6 +19,7 @@ public class ClassResources {
 
         // the stream holding the file content
         if (inputStream == null) {
+            LOGGER.error("Attempting to read invalid class resource {}! This means that something is horribly wrong!", fileName);
             return null;
         } else {
             return inputStream;
