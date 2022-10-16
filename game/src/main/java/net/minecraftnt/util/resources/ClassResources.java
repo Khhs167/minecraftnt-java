@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ClassResources {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(ClassResources.class);
 
     public static InputStream loadResourceAsStream(String fileName) {
 

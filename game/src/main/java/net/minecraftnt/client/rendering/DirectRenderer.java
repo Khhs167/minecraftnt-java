@@ -1,6 +1,7 @@
 package net.minecraftnt.client.rendering;
 
 import net.minecraftnt.client.ClientMainHandler;
+import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.Vector3;
 import net.minecraftnt.util.registries.Registry;
 import org.lwjgl.system.MemoryUtil;
@@ -68,6 +69,14 @@ public final class DirectRenderer {
         }
     }
 
+    /**
+     * Set the width of the line
+     * @param width The width to set to.
+     */
+    public static void drLineWidth(float width){
+        glLineWidth(width);
+    }
+
 
     /**
      * Initialize the DirectRenderer context
@@ -86,16 +95,22 @@ public final class DirectRenderer {
      * Begin a new mesh.
      */
     public static void drBeginDraw(){
+        drLineWidth(1);
         checkContext();
         VERTICES.clear();
         vertexCount = 0;
     }
 
+    public static void drEndDraw(DirectRenderType render_mode){
+        drEndDraw(render_mode, Shader.SHADER_DIRECT);
+    }
+
+
     /**
      * End drawing the mesh and flush to screen
      * @param render_mode The render mode to use
      */
-    public static void drEndDraw(DirectRenderType render_mode) {
+    public static void drEndDraw(DirectRenderType render_mode, Identifier shader) {
 
         float[] vertexBuffer = new float[VERTICES.size()];
         int vertexBufferPointer = 0;
@@ -116,7 +131,7 @@ public final class DirectRenderer {
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, false, VertexInfo.BYTES, VertexInfo.COLOR_OFFSET_BYTES);
 
-        Shader program = Registry.SHADERS.get(Shader.SHADER_DIRECT);
+        Shader program = Registry.SHADERS.get(shader);
 
 
         program.bind();

@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 import static net.minecraftnt.client.rendering.DirectRenderer.*;
 import static net.minecraftnt.client.rendering.DirectRenderer.DIRECTRENDERER_LINES;
@@ -78,9 +79,7 @@ public class ClientMainHandler {
     }
 
     private Pawn currentPawn;
-
-    private Mesh placementMesh;
-    private Transform placementTransform;
+    private Vector3 placementPosition;
     private static ThreadDownloadResources threadDownloadResources;
     private static Session session;
     private static PackInfo currentPackInfo;
@@ -107,8 +106,7 @@ public class ClientMainHandler {
     }
 
     public void setPlacementPosition(Vector3 pos){
-        placementTransform.location = pos.clone();
-        placementTransform.location.setY(-placementTransform.location.getY());
+        placementPosition = pos;
     }
 
     public void loadResources() {
@@ -148,38 +146,7 @@ public class ClientMainHandler {
 
         currentPawn = (PlayerEntity) Minecraft.getInstance().getWorld().createEntity(new Vector3(0, 80, 0), PlayerEntity.IDENTIFIER);
 
-        placementMesh = new Mesh();
-
-        ArrayList<Vector3> vertices = new ArrayList<>();
-        ArrayList<Vector2> uvs = new ArrayList<>();
-        ArrayList<Integer> triangles = new ArrayList<>();
-
-        int vertexIndex = 0;
-        Vector3 pos = new Vector3(0, 0, 0);
-        for (int p = 0; p < 6; p++) {
-            for (int i = 0; i < 6; i++) {
-
-                int triangleIndex = VoxelInformation.voxelTris[p][i];
-                vertices.add(VoxelInformation.voxelVerts[triangleIndex].add(pos));
-                triangles.add(vertexIndex);
-
-                uvs.add(VoxelInformation.voxelUvs[i]);
-
-                vertexIndex++;
-
-            }
-
-        }
-        placementMesh.vertices = vertices.toArray(Vector3[]::new);
-        placementMesh.triangles = triangles.stream().mapToInt(i -> i).toArray();
-        placementMesh.uv = uvs.toArray(Vector2[]::new);
-
-        placementMesh.buildMesh();
-
-        placementMesh.render_mode = GL_LINES;
-
-        placementTransform = new Transform(Vector3.zero());
-        placementTransform.scale = Vector3.one().multiply(1.0f + BLOCK_HIGHLIGHT_OFFSET * 2);
+        setPlacementPosition(new Vector3(1, 50, 1));
 
         Minecraft.getInstance().getWorld().initGraphics();
 
@@ -214,7 +181,22 @@ public class ClientMainHandler {
 
         Texture.use(TERRAIN_ATLAS_IDENTIFIER);
         Minecraft.getInstance().getWorld().render();
-        placementMesh.render(Registry.SHADERS.get(Shader.SHADER_PLACE), placementTransform);
+
+        drBeginDraw();
+        drLineWidth(5f);
+        drVertexColour(Vector3.zero());
+
+        drBeginVertex();
+        drVertexPosition(placementPosition);
+        drEndVertex();
+
+        drBeginVertex();
+        drVertexPosition(placementPosition.add(Vector3.up()));
+        drEndVertex();
+
+        drEndDraw(DIRECTRENDERER_LINES);
+
+
 
         Registry.FONTS.get(Font.FONT_DEFAULT).renderText("Hello World!!!\nThis is all done using bitmap fonts.", new Vector2(20, 100));
 
@@ -222,6 +204,7 @@ public class ClientMainHandler {
             // Draw chunk borders
             {
             drBeginDraw();
+            drLineWidth(2f);
 
             Vector3 colorChunk = Vector3.forward();
             drVertexColour(colorChunk);
@@ -261,7 +244,11 @@ public class ClientMainHandler {
 
             // Draw player velocity
             if(currentPawn != null && currentPawn.getPhysicsBody() != null) {
+
                 drBeginDraw();
+
+                drLineWidth(5f);
+
                 drBeginVertex();
                 drVertexPosition(camera.getTransform().location.add(camera.getForward()));
                 drVertexColour(currentPawn.getPhysicsBody().getVelocity().normalize().absolute());
@@ -274,7 +261,6 @@ public class ClientMainHandler {
             }
 
         }
-
 
         // ImGUI debug info
         if(ImGui.begin("Debug")){
