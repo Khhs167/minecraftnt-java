@@ -1,6 +1,8 @@
 # Minecraftn't java
 ## It ain't Minecraft
 
+[![Java CI with Gradle](https://github.com/Khhs167/minecraftnt-java/actions/workflows/gradle.yml/badge.svg)](https://github.com/Khhs167/minecraftnt-java/actions/workflows/gradle.yml)
+
 This is just a dumb project I am pouring too much effort into.  
 It is a Minecraft clone written in Java with online asset updating, Multithreading etc.  
 Yet I am still to add a proper player controller.
