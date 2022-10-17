@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class KeyboardInput {
+
     private final boolean[] keyboard = new boolean[GLFW_KEY_LAST];
     private final ArrayList<Integer> pressedKeys = new ArrayList<>();
 
@@ -45,6 +46,11 @@ public class KeyboardInput {
      * The forward key(GLFW_KEY_W by default)
      */
     public static final Identifier KEY_RIGHT = Registry.KEYBOARD_MAP.addIdentifier("minecraft", "right", GLFW_KEY_D);
+
+    /**
+     * The sprint key(GLFW_KEY_LEFT_SHIFT by default)
+     */
+    public static final Identifier KEY_SPRINT = Registry.KEYBOARD_MAP.addIdentifier("minecraft", "sprint", GLFW_KEY_LEFT_SHIFT);
 
 
     public void update(){

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraftnt.server.Minecraft;
+import net.minecraftnt.server.blocks.Block;
 import net.minecraftnt.util.Vector3;
 import net.minecraftnt.util.Vector3I;
 import net.minecraftnt.util.registries.Registry;
@@ -31,16 +32,14 @@ public class ColliderAABB implements Collider {
     	List<ColliderAABB> boxes = GetBoxes();
     	
     	velocity = velocity.multiply(0.98F);
-    	
-    	for (int i = 0; i < boxes.size(); i++) {
-    		
-    		ColliderAABB box = boxes.get(i);
-    		
-    		velocity.setX(box.ClipXVelocity(velocity.getX(), this));
-    		velocity.setY(box.ClipYVelocity(velocity.getY(), this));
-    		velocity.setZ(box.ClipZVelocity(velocity.getZ(), this));
-    		
-    	}
+
+        for (ColliderAABB box : boxes) {
+
+            velocity.setX(box.ClipXVelocity(velocity.getX(), this));
+            velocity.setY(box.ClipYVelocity(velocity.getY(), this));
+            velocity.setZ(box.ClipZVelocity(velocity.getZ(), this));
+
+        }
     	
     	min = min.add(velocity);
     	max = max.add(velocity);
@@ -130,10 +129,6 @@ public class ColliderAABB implements Collider {
         
         return vel;
     }
-    
-    ColliderAABB expand(float size) {
-    	return null; //return new ColliderAABB(origin, this.size.addX(size).addY(size).addZ(size));
-    }
 
     @Override
     public boolean colliding(Vector3 position) {
@@ -141,7 +136,7 @@ public class ColliderAABB implements Collider {
     }
     
     List<ColliderAABB> GetBoxes() {
-    	ArrayList<ColliderAABB> boxes = new ArrayList<ColliderAABB>();
+    	ArrayList<ColliderAABB> boxes = new ArrayList<>();
     	
     	final float VOXEL_SIZE = 1.0F;
     	
@@ -154,8 +149,10 @@ public class ColliderAABB implements Collider {
     				int xx = (int)Math.floor(x);
     				int yy = (int)Math.floor(y);
     				int zz = (int)Math.floor(z);
+
+                    Block block = Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(new Vector3I(xx, yy, zz)));
     				
-    				ColliderAABB box = new ColliderAABB(new Vector3(xx, yy, zz), new Vector3(xx + VOXEL_SIZE, yy + VOXEL_SIZE, zz + VOXEL_SIZE));
+    				ColliderAABB box = block.getBoundingBox(new Vector3(xx, yy, zz));
     				boxes.add(box);
     				
     	    	}
@@ -167,8 +164,5 @@ public class ColliderAABB implements Collider {
 
     private boolean getBlock(float x, float y, float z){
         return Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(new Vector3I((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z)))).hasCollisions();
-    }
-    private boolean getBlock(Vector3 p){
-        return getBlock(p.getX(), p.getY(), p.getZ());
     }
 }

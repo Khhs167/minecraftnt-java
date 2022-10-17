@@ -40,6 +40,6 @@ public abstract class Block {
     public abstract int getFaceTexture(BlockFace face);
 
     public ColliderAABB getBoundingBox(Vector3 pos){
-        return new ColliderAABB(pos, Vector3.one());
+        return new ColliderAABB(pos, pos.add(Vector3.one()));
     }
 }

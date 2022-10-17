@@ -3,7 +3,6 @@ package net.minecraftnt.server.entities;
 import net.minecraftnt.client.ClientMainHandler;
 import net.minecraftnt.client.rendering.Camera;
 import net.minecraftnt.server.entities.special.Pawn;
-import net.minecraftnt.server.physics.ColliderAABB;
 import net.minecraftnt.server.physics.PhysicsSettings;
 import net.minecraftnt.util.*;
 import net.minecraftnt.util.input.KeyboardInput;
@@ -12,18 +11,10 @@ import net.minecraftnt.util.input.MouseInput;
 public class PlayerEntity extends Pawn  {
 
     public static final Identifier IDENTIFIER = new Identifier("minecraft", "player");
-
-
-    private final float sprintSpeed = 5.612f;
-    private final float walkSpeed = 9.317f;
-    private final float jumpForce = 0.5f;
     private float cameraRotation = 0;
-    public float gravity = -13f;
     
     private static final float fixedDeltaTime = 1.0F / 50.0F;
     private float acc = 0.0F;
-
-    public ColliderAABB footCollider;
 
     public PlayerEntity(Vector3 pos) {
         super(pos);
@@ -43,6 +34,7 @@ public class PlayerEntity extends Pawn  {
         	getPhysicsBody().addVelocity(PhysicsSettings.gravity.multiply(fixedDeltaTime).multiply(0.25f));
         	
         	if(this.isGrounded && keyboardInput.isKeyDown(KeyboardInput.KEY_JUMP)){
+                float jumpForce = 0.25f;
                 getPhysicsBody().addVelocity(Vector3.up().multiply(jumpForce));
             }
 
@@ -61,9 +53,17 @@ public class PlayerEntity extends Pawn  {
             if(keyboardInput.isKeyDown(KeyboardInput.KEY_RIGHT))
                 xVel -= 1;
 
+            float walkSpeed = 4.317f;
+            float movementSpeed = walkSpeed;
+
+            float sprintSpeed = 6.612f;
+            if(keyboardInput.isKeyDown(KeyboardInput.KEY_SPRINT))
+                movementSpeed = sprintSpeed;
+
+
             Vector3 hVel = Vector3.zero();
             if(xVel != 0 || yVel != 0)
-                hVel = hVel.add(getTransform().getForward().multiply(yVel)).add(getTransform().getRight().multiply(xVel)).normalize().multiply(walkSpeed * fixedDeltaTime);
+                hVel = hVel.add(getTransform().getForward().multiply(yVel)).add(getTransform().getRight().multiply(xVel)).normalize().multiply(movementSpeed * fixedDeltaTime);
 
             getPhysicsBody().getVelocity().setX(hVel.getX());
             getPhysicsBody().getVelocity().setZ(hVel.getZ());

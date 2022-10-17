@@ -7,7 +7,7 @@ import net.minecraftnt.util.Transform;
 import net.minecraftnt.util.Vector3;
 
 public abstract class Entity {
-    private Transform transform;
+    private final Transform transform;
     private PhysicsBody physicsBody;
 
     private float boundsX;
@@ -39,7 +39,7 @@ public abstract class Entity {
     
     public void setPosition(Vector3 pos) {
     	this.transform.location = pos;
-    	this.createAABB(boundsX, boundsX);
+    	this.createAABB(boundsX, boundsY);
     }
     
     public void createAABB(float boundingBoxSizeX, float boundingBoxSizeY) {
@@ -61,7 +61,7 @@ public abstract class Entity {
         float YVel = getPhysicsBody().getVelocity().getY();
         
         isGrounded = originalYVel != YVel && originalYVel < 0.0F && Math.abs(YVel) < 0.01;
-        
+
     }
 
     public float getDeltaTime(){

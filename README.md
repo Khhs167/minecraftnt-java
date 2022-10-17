@@ -7,9 +7,13 @@ Yet I am still to add a proper player controller.
 
 If you came here, I'm so sorry for you.  
 
-This repository contains the minecraft terrain.png which 99% is copyright Mojang.  
-Oh, and it *does* download some Minecraft console music. I'll look into removing that later!  
+When running the project it *does* download a copyrighted terrain.png, I took some liberties and if mojang sees this,
+hope it is okay!
 
 
 ## Contributing
 Don't. I won't accept any PRs as of now.
+
+## Thanks
+
+Thanks to CheeseCommando for his contribution to the physics!

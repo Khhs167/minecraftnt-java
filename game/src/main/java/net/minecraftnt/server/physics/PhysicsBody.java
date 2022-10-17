@@ -10,11 +10,8 @@ public class PhysicsBody {
     private Vector3 velocity;
     private boolean doSimulate;
 
-    private final Entity entity;
-
     public PhysicsBody(Entity entity) {
-        this.entity = entity;
-        this.transform = this.entity.getTransform();
+        this.transform = entity.getTransform();
         this.velocity = Vector3.zero();
         this.doSimulate = true;
     }
@@ -25,15 +22,6 @@ public class PhysicsBody {
         return this;
     }
 
-    public boolean colliding(){
-        return colliding(getTransform().location);
-    }
-
-    public boolean colliding(Vector3 pos){
-        if(collider != null)
-            return collider.colliding(pos);
-        return false;
-    }
 
     public PhysicsBody setDoSimulate(boolean doSimulate) {
         this.doSimulate = doSimulate;
