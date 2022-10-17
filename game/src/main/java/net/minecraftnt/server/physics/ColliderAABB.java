@@ -1,27 +1,23 @@
 package net.minecraftnt.server.physics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraftnt.server.Minecraft;
-import net.minecraftnt.server.blocks.Block;
-import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.Vector3;
 import net.minecraftnt.util.Vector3I;
 import net.minecraftnt.util.registries.Registry;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
 
 public class ColliderAABB implements Collider {
 
-    public Vector3 origin;
-    public Vector3 size;
+    public Vector3 min;
+    public Vector3 max;
+    
+    static final float epsilon = 3.0f;
 
-    private static final Logger LOGGER = LogManager.getLogger(ColliderAABB.class);
-
-
-    public ColliderAABB(Vector3 origin, Vector3 size){
-        this.origin = origin;
-        this.size = size;
+    public ColliderAABB(Vector3 min, Vector3 max){
+        this.min = min;
+        this.max = max;
     }
 
     @Override
@@ -29,132 +25,150 @@ public class ColliderAABB implements Collider {
         return true;
     }
 
-    public float clipXVelocity(float velocity, ColliderAABB box){
-
-
-        return velocity;
-
-    }
-
-
     @Override
     public ConstrainResult constrain(Vector3 position, Vector3 velocity) {
+        
+    	List<ColliderAABB> boxes = GetBoxes();
+    	
+    	velocity = velocity.multiply(0.98F);
+    	
+    	for (int i = 0; i < boxes.size(); i++) {
+    		
+    		ColliderAABB box = boxes.get(i);
+    		
+    		velocity.setX(box.ClipXVelocity(velocity.getX(), this));
+    		velocity.setY(box.ClipYVelocity(velocity.getY(), this));
+    		velocity.setZ(box.ClipZVelocity(velocity.getZ(), this));
+    		
+    	}
+    	
+    	min = min.add(velocity);
+    	max = max.add(velocity);
 
-        Vector3 deltaVelocity = velocity.multiply(Minecraft.getInstance().getDeltaTime());
-
-        // Thanks to "ImSheeshCommando's" for this solution! If you wish to change it to a proper username, just go in and do it lol.
-
-        var boundingBoxes = getCollidingBlockBoundingBoxes(position);
-
-        for(ColliderAABB blockAABB : boundingBoxes){
-            LOGGER.debug("{},{} colliding: {}", blockAABB.origin.toString(), blockAABB.size.toString(), colliding(blockAABB));
-        }
-
-
-
-        // TODO: Write a replacement for this code and delete it ig.
-        /*
-
-        // Old method
-
-        if(colliding(position.add(velocity.multiply(Minecraft.getInstance().getDeltaTime())))){
-            Vector3 direction = velocity.normalize();
-
-            final float step_size = 0.01f;
-            final int max_steps = 200;
-
-            int c = 0;
-
-            while(c < max_steps && !colliding(position)){
-
-                position = position.add(direction.multiply(step_size));
-
-                c++;
-            }
-            if(c < max_steps)
-                position = position.add(direction.multiply(-step_size));
-
-            velocity = Vector3.zero();
-
-        }*/
-
-        // TODO: Maybe not in here, but add divide and add it in here!
-
-        // We have no vector3.divide yet because I am lazy. Multiply by 1 / n instead
-        return new ConstrainResult(position, deltaVelocity.multiply(1 / Minecraft.getInstance().getDeltaTime()));
+        return new ConstrainResult(position, velocity);
     }
-
-    public ArrayList<ColliderAABB> getCollidingBlockBoundingBoxes(Vector3 position){
-        ArrayList<ColliderAABB> boundingBoxes = new ArrayList<>();
-
-        for(int x = 0; x < size.getX(); x++){
-            for (int y = 0; y < size.getY(); y++){
-                for(int z = 0; z < size.getZ(); z++){
-
-                    Vector3 blockPos = position.add(origin).addX(x).addY(y).addZ(z);
-                    Block block = getBlockClass(blockPos);
-                    if(block.hasCollisions())
-                        boundingBoxes.add(block.getBoundingBox(blockPos));
-                }
-            }
+    
+    float ClipXVelocity(float vel, ColliderAABB box) {
+    	
+    	//Checks if box y and z are inside this aabb
+    	
+    	if(box.max.getY() <= min.getY() || box.min.getY() >= max.getY())
+        {
+            return vel;
+        }
+        if(box.max.getZ() <= min.getZ() || box.min.getZ() >= max.getZ())
+        {
+            return vel;
         }
 
-        return boundingBoxes;
+        // If the aabb is inside on this axis clip the velocity
+        
+        if (vel > 0.0 && box.max.getX() <= min.getX()) {
+        	float clipVel = min.getX() - box.max.getX();
+            if (clipVel < vel) vel = clipVel;
+        }
+        
+        if (vel < 0.0 && box.min.getX() >= max.getX()) {
+        	float clipVel = max.getX() - box.min.getX();
+            if (clipVel > vel) vel = clipVel;
+        }
+        return vel;
     }
-
-    public ArrayList<Block> getCollidingBlocks(Vector3 position) {
-        ArrayList<Block> blocks = new ArrayList<>();
-
-        for(int x = 0; x < size.getX(); x++){
-            for (int y = 0; y < size.getY(); y++){
-                for(int z = 0; z < size.getZ(); z++){
-                    blocks.add(getBlockClass(position.add(origin).addX(x).addY(y).addZ(z)));
-                }
-            }
+    
+    float ClipZVelocity(float vel, ColliderAABB box) {
+    	
+    	//Checks if box x and y are inside this aabb
+    	
+    	if(box.max.getY() <= min.getY() || box.min.getY() >= max.getY())
+        {
+            return vel;
+        }
+        if(box.max.getX() <= min.getX() || box.min.getX() >= max.getX())
+        {
+            return vel;
         }
 
-        return blocks;
+        // If the aabb is inside on this axis clip the velocity
+        
+        if (vel > 0.0 && box.max.getZ() <= min.getZ()) {
+        	float clipVel = min.getZ() - box.max.getZ();
+            if (clipVel < vel) vel = clipVel;
+        }
+        
+        if (vel < 0.0 && box.min.getZ() >= max.getZ()) {
+        	float clipVel = max.getZ() - box.min.getZ();
+            if (clipVel > vel) vel = clipVel;
+        }
+        
+        return vel;
+    }
+    
+    float ClipYVelocity(float vel, ColliderAABB box) {
+    	
+    	//Checks if box x and z are inside this aabb
+    	
+    	if(box.max.getX() <= min.getX() || box.min.getX() >= max.getX())
+        {
+            return vel;
+        }
+        if(box.max.getZ() <= min.getZ() || box.min.getZ() >= max.getZ())
+        {
+            return vel;
+        }
+        
+        // If the aabb is inside on this axis clip the velocity
+
+        if (vel > 0.0F && box.max.getY() <= min.getY()) {
+        	float clipVel = min.getY() - box.max.getY();
+            if (clipVel < vel) vel = clipVel;
+        }
+        
+        if (vel < 0.0F && box.min.getY() >= max.getY()) {
+        	float clipVel = max.getY() - box.min.getY();
+            if (clipVel > vel) vel = clipVel;
+        }
+        
+        return vel;
+    }
+    
+    ColliderAABB expand(float size) {
+    	return null; //return new ColliderAABB(origin, this.size.addX(size).addY(size).addZ(size));
     }
 
     @Override
     public boolean colliding(Vector3 position) {
-        for(int x = 0; x < size.getX(); x++){
-            for (int y = 0; y < size.getY(); y++){
-                for(int z = 0; z < size.getZ(); z++){
-                    if(getBlock(position.add(origin).addX(x).addY(y).addZ(z)))
-                        return true;
-                }
-            }
-        }
-        return getBlock(position.add(size));
+        return true;
     }
-
-    public boolean colliding(ColliderAABB box){
-
-        return  this.origin.getX() <= box.origin.getX() + box.size.getX() &&
-                this.origin.getX() + this.size.getX() >= box.origin.getX() &&
-
-                this.origin.getY() <= box.origin.getY() + box.size.getY() &&
-                this.origin.getY() + this.size.getY() >= box.origin.getY() &&
-
-                this.origin.getZ() <= box.origin.getZ() + box.size.getZ() &&
-                this.origin.getZ() + this.size.getZ() >= box.origin.getZ();
+    
+    List<ColliderAABB> GetBoxes() {
+    	ArrayList<ColliderAABB> boxes = new ArrayList<ColliderAABB>();
+    	
+    	final float VOXEL_SIZE = 1.0F;
+    	
+    	for (float x = min.getX() - epsilon; x <= max.getX() + epsilon; x += VOXEL_SIZE) {
+    		for (float y = min.getY() - epsilon; y <= max.getY() + epsilon; y += VOXEL_SIZE) {
+    			for (float z = min.getZ() - epsilon; z <= max.getZ() + epsilon; z += VOXEL_SIZE) {
+    	    		
+    				if (!getBlock(x, y, z)) continue;
+    				
+    				int xx = (int)Math.floor(x);
+    				int yy = (int)Math.floor(y);
+    				int zz = (int)Math.floor(z);
+    				
+    				ColliderAABB box = new ColliderAABB(new Vector3(xx, yy, zz), new Vector3(xx + VOXEL_SIZE, yy + VOXEL_SIZE, zz + VOXEL_SIZE));
+    				boxes.add(box);
+    				
+    	    	}
+        	}
+    	}
+    	
+    	return boxes;
     }
-
 
     private boolean getBlock(float x, float y, float z){
-        return Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(new Vector3I((int)x, (int)y, (int)z))).hasCollisions();
+        return Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(new Vector3I((int)Math.floor(x), (int)Math.floor(y), (int)Math.floor(z)))).hasCollisions();
     }
-
-    private Block getBlockClass(float x, float y, float z){
-        return Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(new Vector3I((int)x, (int)y, (int)z)));
-    }
-
-    private Block getBlockClass(Vector3 p){
-        return Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(p.floor()));
-    }
-
     private boolean getBlock(Vector3 p){
-        return Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(p.floor())).hasCollisions();
+        return getBlock(p.getX(), p.getY(), p.getZ());
     }
 }
