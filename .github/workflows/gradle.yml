@@ -36,10 +36,8 @@ jobs:
     - name: Upload client jar artifact
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: client_jar
-        path: 'game/build/libs/'
+        path: 'game/build/libs/client.jar'
     - name: Upload launcher jar artifact
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: launcher_jar
-        path: 'launcher/build/libs/'
+        path: 'launcher/build/libs/launcher.jar'
