@@ -1,12 +1,11 @@
 package net.minecraftnt.server.physics;
 
-import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.entities.Entity;
 import net.minecraftnt.util.Transform;
 import net.minecraftnt.util.Vector3;
 
 public class PhysicsBody {
-    private Collider collider;
+    private ColliderAABB collider;
     private final Transform transform;
     private Vector3 velocity;
     private boolean doSimulate;
@@ -21,7 +20,7 @@ public class PhysicsBody {
     }
 
 
-    public PhysicsBody setCollider(Collider collider) {
+    public PhysicsBody setCollider(ColliderAABB collider) {
         this.collider = collider;
         return this;
     }
@@ -45,8 +44,9 @@ public class PhysicsBody {
         if(doSimulate) {
             constrain();
         }
-
-        transform.location = transform.location.add(velocity.multiply(entity.getDeltaTime()));
+        transform.location.setX((collider.min.getX() + collider.max.getX()) / 2.0F);
+        transform.location.setY(collider.min.getY());
+        transform.location.setZ((collider.min.getZ() + collider.max.getZ()) / 2.0F);
     }
 
     public PhysicsBody setVelocity(Vector3 velocity) {
@@ -67,7 +67,7 @@ public class PhysicsBody {
         return velocity;
     }
 
-    public Collider getCollider() {
+    public ColliderAABB getCollider() {
         return collider;
     }
 
@@ -75,7 +75,6 @@ public class PhysicsBody {
         if (collider != null) {
             if (collider.shouldConstrain()) {
                 ConstrainResult result = collider.constrain(getTransform().location, velocity);
-                getTransform().location = result.position;
                 velocity = result.velocity;
             }
         }
