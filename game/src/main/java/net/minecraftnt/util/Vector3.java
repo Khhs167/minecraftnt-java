@@ -158,4 +158,13 @@ public class Vector3 {
     public Vector3 absolute(){
         return new Vector3(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
     }
+
+    @Override
+    public String toString() {
+        return "Vector3{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
+    }
 }

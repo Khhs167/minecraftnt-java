@@ -1,6 +1,8 @@
 package net.minecraftnt.server.blocks;
 
+import net.minecraftnt.server.physics.ColliderAABB;
 import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.Vector3;
 import net.minecraftnt.util.registries.Registry;
 
 public abstract class Block {
@@ -36,4 +38,8 @@ public abstract class Block {
     public float getIllumination() { return 0f; }
 
     public abstract int getFaceTexture(BlockFace face);
+
+    public ColliderAABB getBoundingBox(Vector3 pos){
+        return new ColliderAABB(pos, Vector3.one());
+    }
 }
