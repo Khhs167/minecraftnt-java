@@ -25,4 +25,9 @@ public class Air extends Block{
     public boolean hasCollisions() {
         return false;
     }
+
+    @Override
+    public boolean placeableSurface() {
+        return false;
+    }
 }

@@ -60,7 +60,7 @@ public abstract class Entity {
         
         float YVel = getPhysicsBody().getVelocity().getY();
         
-        isGrounded = originalYVel != YVel && originalYVel < 0.0F && Math.abs(YVel) < 0.01;
+        isGrounded = originalYVel != YVel && originalYVel < 0.0F && Math.abs(YVel) < 0.01f;
 
     }
 

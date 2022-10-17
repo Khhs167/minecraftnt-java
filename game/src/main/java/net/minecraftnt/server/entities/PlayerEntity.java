@@ -2,11 +2,15 @@ package net.minecraftnt.server.entities;
 
 import net.minecraftnt.client.ClientMainHandler;
 import net.minecraftnt.client.rendering.Camera;
+import net.minecraftnt.server.Minecraft;
+import net.minecraftnt.server.blocks.Block;
 import net.minecraftnt.server.entities.special.Pawn;
 import net.minecraftnt.server.physics.PhysicsSettings;
+import net.minecraftnt.server.world.World;
 import net.minecraftnt.util.*;
 import net.minecraftnt.util.input.KeyboardInput;
 import net.minecraftnt.util.input.MouseInput;
+import net.minecraftnt.util.registries.Registry;
 
 public class PlayerEntity extends Pawn  {
 
@@ -15,6 +19,8 @@ public class PlayerEntity extends Pawn  {
     
     private static final float fixedDeltaTime = 1.0F / 50.0F;
     private float acc = 0.0F;
+
+
 
     public PlayerEntity(Vector3 pos) {
         super(pos);
@@ -85,6 +91,29 @@ public class PlayerEntity extends Pawn  {
         cameraRotation += mouse.getY() * 30;
 
         cameraRotation = Math.max(Math.min(cameraRotation, 89), -89);
+
+        Vector3 pos = getTransform().location;
+        Vector3 dir = ClientMainHandler.getInstance().getCamera().getForward().normalize();
+        float epsilon = 0.1f;
+        float max_length = 10;
+        int max_steps = (int) (max_length / epsilon);
+        int step = 0;
+
+        while (step < max_steps){
+            pos = pos.add(dir.multiply(epsilon));
+
+            Block block = Registry.BLOCKS.get(Minecraft.getInstance().getWorld().getBlock(pos.floor()));
+
+            if(block.placeableSurface()){
+                pos = pos.add(dir.multiply(epsilon));
+                ClientMainHandler.getInstance().setPlacementPosition(pos.floor().toFloat());
+                break;
+            }
+
+            step++;
+
+        }
+
     }
     @Override
     public void translateCamera(Camera camera) {

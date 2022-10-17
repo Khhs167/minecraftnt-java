@@ -34,6 +34,7 @@ public abstract class Block {
     }
 
     public boolean hasCollisions() { return true; }
+    public boolean placeableSurface() { return true; }
     public float getOpacity() { return 1f; }
     public float getIllumination() { return 0f; }
 

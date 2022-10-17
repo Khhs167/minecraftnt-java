@@ -86,6 +86,9 @@ public class ClientMainHandler {
 
     public static final Gson GSON = new GsonBuilder().create();
 
+    public Vector3 getPlacementPosition() {
+        return placementPosition;
+    }
 
     public static void run(Session session) {
         LOGGER.info("Launching client with username '{}', session id '{}'", session.getUsername(), session.getId());
@@ -187,11 +190,11 @@ public class ClientMainHandler {
         drVertexColour(Vector3.zero());
 
         drBeginVertex();
-        drVertexPosition(placementPosition);
+        drVertexPosition(placementPosition.sub(Vector3.one().multiply(-BLOCK_HIGHLIGHT_OFFSET)));
         drEndVertex();
 
         drBeginVertex();
-        drVertexPosition(placementPosition.add(Vector3.up()));
+        drVertexPosition(placementPosition.add(Vector3.up()).add(Vector3.one().multiply(BLOCK_HIGHLIGHT_OFFSET)));
         drEndVertex();
 
         drEndDraw(DIRECTRENDERER_LINES);
@@ -366,7 +369,7 @@ public class ClientMainHandler {
                 }
 
                 if(ImGui.button("Reset position")){
-                    currentPawn.getTransform().location = Vector3.up().multiply(80f);
+                    currentPawn.setPosition(Vector3.up().multiply(80f));
                     if(currentPawn.getPhysicsBody() != null)
                         currentPawn.getPhysicsBody().setVelocity(Vector3.zero());
                 }

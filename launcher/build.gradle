@@ -19,7 +19,6 @@ dependencies {
 jar {
     manifest {
         attributes 'Implementation-Title': 'Minecraftnt Launcher',
-                'Implementation-Version': version,
                 'Main-Class': 'net.minecraftnt.launcher.Main'
     }
     from {
