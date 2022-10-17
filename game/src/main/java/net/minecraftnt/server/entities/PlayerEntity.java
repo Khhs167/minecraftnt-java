@@ -27,7 +27,7 @@ public class PlayerEntity extends Pawn  {
 
     public PlayerEntity(Vector3 pos) {
         super(pos);
-        footCollider = new ColliderAABB(Vector3.zero().addX(0.1f).addZ(0.1f).addY(-0.1f), new Vector3(0.8f, 0.2f, 0.8f));
+        this.createAABB(0.6f, 1.8f);
     }
 
     @Override

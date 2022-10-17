@@ -9,10 +9,10 @@ import net.minecraftnt.util.Vector3;
 public abstract class Entity {
     private Transform transform;
     private PhysicsBody physicsBody;
+
+    private float boundsX;
+    private float boundsY;
     
-    protected float boundingBoxSizeX = 0.6f;
-    protected float boundingBoxSizeY = 1.8f;
-    public float eyesOffset = 1.6f;
     public boolean isGrounded;
     
     public Transform getTransform(){
@@ -35,11 +35,19 @@ public abstract class Entity {
     
     public Entity(Vector3 pos){
         this.transform = new Transform(pos);
-        setPos(pos);
     }
-    public void setPos(Vector3 pos) {
+    
+    public void setPosition(Vector3 pos) {
+    	this.transform.location = pos;
+    	this.createAABB(boundsX, boundsX);
+    }
+    
+    public void createAABB(float boundingBoxSizeX, float boundingBoxSizeY) {
     	float halfWidth = boundingBoxSizeX / 2.0F;
         float halfHeight = boundingBoxSizeY / 2.0F;
+        this.boundsX = boundingBoxSizeX;
+        this.boundsY = boundingBoxSizeY;
+        Vector3 pos = transform.location;
     	addPhysicsBody().setCollider(new ColliderAABB(
     			new Vector3(pos.getX() - halfWidth, pos.getY() - halfHeight, pos.getZ() - halfWidth),
     			new Vector3(pos.getX() + halfWidth, pos.getY() + halfHeight, pos.getZ() + halfWidth)));
@@ -54,10 +62,6 @@ public abstract class Entity {
         
         isGrounded = originalYVel != YVel && originalYVel < 0.0F && Math.abs(YVel) < 0.01;
         
-        ColliderAABB bb = getPhysicsBody().getCollider();
-        transform.location.setX((bb.min.getX() + bb.max.getX()) / 2.0F);
-        transform.location.setY(bb.min.getY());
-        transform.location.setZ((bb.min.getZ() + bb.max.getZ()) / 2.0F);
     }
 
     public float getDeltaTime(){
