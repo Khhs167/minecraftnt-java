@@ -1,6 +1,5 @@
 package net.minecraftnt.server.physics;
 
-import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.entities.Entity;
 import net.minecraftnt.util.Transform;
 import net.minecraftnt.util.Vector3;
@@ -45,6 +44,9 @@ public class PhysicsBody {
         if(doSimulate) {
             constrain();
         }
+        transform.location.setX((collider.min.getX() + collider.max.getX()) / 2.0F);
+        transform.location.setY(collider.min.getY());
+        transform.location.setZ((collider.min.getZ() + collider.max.getZ()) / 2.0F);
     }
 
     public PhysicsBody setVelocity(Vector3 velocity) {
