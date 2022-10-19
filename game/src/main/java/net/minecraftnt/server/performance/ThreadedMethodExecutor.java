@@ -41,7 +41,7 @@ public class ThreadedMethodExecutor extends Thread{
         LOGGER.info("Starting thread..");
         try {
             while (shouldRun) {
-                if (!threadedMethods.isEmpty()) {
+                if (threadedMethods.size() > 0) {
                     threadedMethods.remove().run();
                 }
             }

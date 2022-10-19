@@ -1,9 +1,12 @@
 package net.minecraftnt.client;
 
 import net.minecraftnt.client.rendering.Window;
+import net.minecraftnt.client.sound.SoundClip;
+import net.minecraftnt.client.sound.SoundManager;
 import net.minecraftnt.server.Minecraft;
 import net.minecraftnt.server.performance.ThreadedMethodExecutor;
 import net.minecraftnt.util.GameInfo;
+import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.resources.ClassResources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,18 +51,25 @@ public class Main {
 
             LOGGER.info("Creating minecraftn't instance");
 
+            SoundManager.initialize();
+
+
+
             ClientMainHandler.tryCreate();
             Minecraft.tryCreate();
 
             LOGGER.info("Running game");
             ClientMainHandler.run(new Session(user, session));
 
+            SoundManager.getInstance().close();
+
             LOGGER.info("Halting ThreadedMethodExecutor!");
             ThreadedMethodExecutor.getExecutor().halt();
             LOGGER.info("Goodbye!");
         } catch (Exception e){
 
-            ClientMainHandler.getInstance().getWindow().close();
+            if(ClientMainHandler.getInstance() != null)
+                ClientMainHandler.getInstance().getWindow().close();
 
             StringWriter stringWriter = new StringWriter();
             PrintWriter stackTraceStream = new PrintWriter(stringWriter);

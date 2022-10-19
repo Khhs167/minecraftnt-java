@@ -1,12 +1,14 @@
 package net.minecraftnt.util.registries;
 import net.minecraftnt.client.rendering.Shader;
 import net.minecraftnt.client.rendering.Texture;
+import net.minecraftnt.client.sound.SoundClip;
 import net.minecraftnt.client.ui.fonts.Font;
 import net.minecraftnt.server.blocks.Block;
 import net.minecraftnt.server.entities.Entity;
 import net.minecraftnt.server.world.generators.IRWorldGenerator;
 import net.minecraftnt.util.Identifier;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class Registry<T>{
@@ -23,7 +25,7 @@ public class Registry<T>{
     }
 
     public T add(Identifier identifier, T registrable){
-        return add(identifier, registrable, false);
+        return add(identifier, registrable, true);
     }
 
     public Identifier addIdentifier(String namespace, String name, T registrable){
@@ -40,6 +42,10 @@ public class Registry<T>{
         return map.get(identifier);
     }
 
+    public Collection<T> getValues() {
+        return map.values();
+    }
+
     public static final Registry<IRWorldGenerator> WORLD_GENERATORS = new Registry<>();
     public static final Registry<Block> BLOCKS = new Registry<>();
     public static final Registry<Texture> TEXTURES = new Registry<>();
@@ -47,4 +53,5 @@ public class Registry<T>{
     public static final Registry<Font> FONTS = new Registry<>();
     public static final Registry<Shader> SHADERS = new Registry<>();
     public static final Registry<Integer> KEYBOARD_MAP = new Registry<>();
+    public static final Registry<SoundClip> SOUNDS = new Registry<>();
 }

@@ -5,6 +5,9 @@ import com.google.gson.GsonBuilder;
 import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraftnt.client.rendering.*;
+import net.minecraftnt.client.sound.SoundClip;
+import net.minecraftnt.client.sound.SoundManager;
+import net.minecraftnt.client.sound.SoundSource;
 import net.minecraftnt.client.ui.fonts.Font;
 import net.minecraftnt.client.voxels.VoxelInformation;
 import net.minecraftnt.server.Minecraft;
@@ -21,6 +24,8 @@ import net.minecraftnt.util.resources.PackInfo;
 import net.minecraftnt.util.resources.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -54,6 +59,7 @@ public class ClientMainHandler {
     private static final MouseInput mouse = new MouseInput();
 
     public static final Identifier TERRAIN_ATLAS_IDENTIFIER = new Identifier("minecraft", "terrain");
+    public static final Identifier TEST_SOUND = new Identifier("minecraft", "fuel");
 
     public static final int TERRAIN_ATLAS_TEXTURES = 16;
     public static final float TERRAIN_ATLAS_TEXTURE_SIZE = 1f / (float)TERRAIN_ATLAS_TEXTURES;
@@ -133,7 +139,12 @@ public class ClientMainHandler {
 
         currentPackInfo = GSON.fromJson(Resources.loadResourceAsString("pack.json"), PackInfo.class);
 
+
+        SoundClip.loadSoundClip(TEST_SOUND, "assets/sound/mixer.ogg");
+
     }
+
+    private SoundSource musicSource;
 
     public void loadClientSide(){
 
@@ -153,11 +164,23 @@ public class ClientMainHandler {
 
         Minecraft.getInstance().getWorld().initGraphics();
 
+        musicSource = SoundManager.getInstance().play(TEST_SOUND, true, Vector3.zero());
+
+
     }
+
 
     public void update(){
 
         threadDownloadResources.tryReload();
+
+        musicSource.setPosition(Vector3.zero());
+        musicSource.setSpeed(Vector3.zero());
+        musicSource.setProperty(AL11.AL_REFERENCE_DISTANCE, 10f);
+        musicSource.setProperty(AL11.AL_MAX_DISTANCE, 20f);
+        SoundManager.getInstance().setListenerPosition(currentPawn.getTransform().location);
+        SoundManager.getInstance().setListenerVelocity(currentPawn.getPhysicsBody().getVelocity());
+        SoundManager.getInstance().setListenerOrientation(camera.getForward(), camera.getRight());
 
         if(currentPawn != null)
             currentPawn.translateCamera(camera);

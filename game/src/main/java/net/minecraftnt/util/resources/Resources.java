@@ -1,10 +1,16 @@
 package net.minecraftnt.util.resources;
 
 import net.minecraftnt.util.GameInfo;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.system.MemoryUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 
 public class Resources {
@@ -72,5 +78,46 @@ public class Resources {
             return classStream;
 
         return null;
+    }
+
+
+    /**
+     * Loads a resource file as a byte buffer. Used in the sound system.
+     * @param resource The resource to load
+     * @return A byte buffer with data. Might be null.
+     */
+    public static ByteBuffer loadResourceAsByteBuffer(String resource) {
+        ByteBuffer buffer;
+        byte[] source = loadResourceAsBytes(resource);
+
+        if(source == null)
+            return null;
+
+        try (InputStream stream = new ByteArrayInputStream(source); ReadableByteChannel rbc = Channels.newChannel(stream)) {
+            buffer = BufferUtils.createByteBuffer(source.length);
+
+            while (true) {
+                int bytes = rbc.read(buffer);
+                if (bytes == -1) {
+                    break;
+                }
+                if (buffer.remaining() == 0) {
+                    buffer = resizeBuffer(buffer, buffer.capacity() * 3 / 2); // 50%
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        buffer.flip();
+        return MemoryUtil.memSlice(buffer);
+    }
+
+    private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
+        ByteBuffer newBuffer = BufferUtils.createByteBuffer(newCapacity);
+        buffer.flip();
+        newBuffer.put(buffer);
+        return newBuffer;
     }
 }

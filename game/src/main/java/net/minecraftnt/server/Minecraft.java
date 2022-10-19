@@ -12,9 +12,13 @@ import org.apache.logging.log4j.LogManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 
 public class Minecraft {
+
+    public static final Random RANDOM = new Random();
+
     private static Minecraft theMinecraft = null;
 
     public static Minecraft getInstance(){

@@ -17,6 +17,8 @@ void main()
     float originalZ = gl_FragCoord.z / gl_FragCoord.w;
     float fog = clamp(pow(originalZ / fogDepth, 2), 0, 1);
 
+    float finalLightning = lightning * 0.9f + 0.1f;
 
-    FragColor = mix(vec4(color.rgb * lightning, color.a), fogColour , fog);
+
+    FragColor = mix(vec4(color.rgb * finalLightning, color.a), fogColour , fog);
 }
