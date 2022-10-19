@@ -88,18 +88,19 @@ dependencies {
 }
 
 // Manifests
-
 jar {
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-    manifest {
-        attributes "Main-Class": "net.minecraftnt.client.Main"
-    }
 
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Implementation-Title': 'Minecraftnt Client',
+                'Main-Class': 'net.minecraftnt.client.Main'
+    }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-
+    archiveFileName.set("client.jar")
 }
 
 application {

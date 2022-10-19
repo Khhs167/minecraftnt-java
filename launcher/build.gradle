@@ -17,6 +17,9 @@ dependencies {
 }
 
 jar {
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     manifest {
         attributes 'Implementation-Title': 'Minecraftnt Launcher',
                 'Main-Class': 'net.minecraftnt.launcher.Main'
