@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import org.controlsfx.control.ListSelectionView?>
+<?import org.controlsfx.control.GridView?>
+<HBox xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="net.minecraftnt.launcher.ui.ProfileEditor"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <VBox HBox.hgrow="SOMETIMES">
+        <Label>Profiles</Label>
+        <ListView VBox.vgrow="ALWAYS" fx:id="profilesList"/>
+
+        <HBox>
+            <Button HBox.hgrow="ALWAYS" onAction="#addProfile">Add</Button>
+            <Button HBox.hgrow="ALWAYS" onAction="#removeProfile">Remove</Button>
+        </HBox>
+    </VBox>
+    <Separator orientation="VERTICAL"/>
+    <VBox HBox.hgrow="ALWAYS" fx:id="editorBox">
+        <Label>Profile</Label>
+        <Separator/>
+        <Label>Name:</Label>
+        <TextField fx:id="nameBox"/>
+        <Label>Version(Anything below 1.2 will require tinkering):</Label>
+        <ComboBox fx:id="versionsBox"/>
+        <Label>Username:</Label>
+        <TextField fx:id="usernameBox"/>
+
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <Button onAction="#saveProfile">Save</Button>
+    </VBox>
+
+</HBox>

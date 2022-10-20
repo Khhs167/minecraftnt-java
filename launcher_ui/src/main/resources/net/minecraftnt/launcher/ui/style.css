@@ -1,0 +1,63 @@
+#main{
+    -fx-background-image: url("bg.png");
+    -fx-background-repeat: repeat;
+    -fx-background-size: 64 64;
+    -fx-background-position: center center;
+}
+
+#logo {
+    -fx-end-margin: 10px;
+}
+
+/*#play {
+    -fx-background-image: url('play_button/normal.png');
+    -fx-background-color: white;
+    -fx-min-width: 128;
+    -fx-min-height: 64;
+    -fx-padding: 0;
+    -fx-background-radius: 0px;
+    transition: all ease 1s;
+}
+
+#play:hover {
+    -fx-background-radius: 5px;
+    -fx-background-image: url('play_button/hover.png');
+}
+
+#play:pressed {
+    -fx-background-radius: 20px;
+    -fx-background-image: url('play_button/click.png');
+}*/
+
+#settings {
+    -fx-min-width: 150px;
+    -fx-max-width: 150px;
+    -fx-min-height: 50px;
+}
+
+#play {
+    -fx-min-width: 200px;
+    -fx-max-width: 200px;
+    -fx-min-height: 75px;
+    -fx-font-size: 20;
+}
+
+#launcherUpdate {
+    -fx-min-width: 150px;
+    -fx-max-width: 150px;
+    -fx-min-height: 50px;
+}
+
+#profiles {
+    -fx-max-width: 150px;
+    -fx-min-width: 150px;
+    -fx-min-height: 25px;
+    -fx-max-height: 25px;
+}
+
+#addProfile {
+    -fx-max-width: 150px;
+    -fx-min-width: 150px;
+    -fx-min-height: 25px;
+    -fx-max-height: 25px;
+}
