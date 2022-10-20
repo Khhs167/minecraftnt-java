@@ -62,3 +62,20 @@ dependencies {
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'net.lingala.zip4j:zip4j:2.11.2'
 }
+
+
+jar {
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Implementation-Title': 'Minecraftnt Launcher',
+                'Main-Class': 'net.minecraftnt.launcher.ui.LauncherApplication'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    archiveFileName.set("launcher.jar")
+}
+

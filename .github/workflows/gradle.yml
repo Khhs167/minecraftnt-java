@@ -40,4 +40,8 @@ jobs:
     - name: Upload launcher jar artifact
       uses: actions/upload-artifact@v3.1.0
       with:
-        path: 'launcher/build/libs/launcher.jar'
+        path: 'launcher_ui/build/libs/launcher.jar'
+    - name: Upload launcher core jar artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        path: 'launcher/build/libs/launcher_core.jar'
