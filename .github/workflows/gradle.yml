@@ -33,14 +33,18 @@ jobs:
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: jar
+    - name: Build launcher dist with Gradle
+      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      with:
+        arguments: launcher_ui:distZip
     - name: Upload client jar artifact
       uses: actions/upload-artifact@v3.1.0
       with:
         path: 'game/build/libs/client.jar'
-    - name: Upload launcher jar artifact
+    - name: Upload launcher dist zip artifact
       uses: actions/upload-artifact@v3.1.0
       with:
-        path: 'launcher_ui/build/libs/launcher.jar'
+        path: 'launcher_ui/build/distributions/launcher.zip'
     - name: Upload launcher core jar artifact
       uses: actions/upload-artifact@v3.1.0
       with:

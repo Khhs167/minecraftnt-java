@@ -1,15 +1,13 @@
 package net.minecraftnt.launcher.ui;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Objects;
