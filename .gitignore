@@ -1,7 +1,0 @@
-/build
-/build/*
-/logs
-/.gradle
-/.idea
-/imgui.ini
-hs_err_*.log

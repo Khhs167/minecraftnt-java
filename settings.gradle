@@ -1,4 +1,4 @@
 rootProject.name = 'minecraftnt'
-include 'launcher'
-include 'game'
-include 'launcher_ui'
+
+include 'client'
+include 'server'
