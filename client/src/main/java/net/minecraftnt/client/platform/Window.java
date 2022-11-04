@@ -59,6 +59,8 @@ public class Window {
 
         glfwSetWindowSizeCallback(windowHandle, this::windowResizeCallback);
 
+        previousTime = getTime();
+
     }
 
     private void windowResizeCallback(long window, int w, int h){
@@ -75,11 +77,21 @@ public class Window {
         return height;
     }
 
+    private float previousTime;
+    private float frameTime;
+
+    public float getFrameTime() {
+        return frameTime;
+    }
+
     public float getAspectRatio() {
         return (float)width / (float)height;
     }
 
     public boolean stepFrame(){
+
+        frameTime = getTime() - previousTime;
+        previousTime = getTime();
 
         if(glfwWindowShouldClose(windowHandle))
             return false;

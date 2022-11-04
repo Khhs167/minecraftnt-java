@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'io.spring.dependency-management' version '1.0.1.RELEASE'
 }
 
 repositories {
@@ -19,10 +20,6 @@ switch (OperatingSystem.current()) {
     case OperatingSystem.WINDOWS:
         project.ext.lwjglNatives = "natives-windows"
         break
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {

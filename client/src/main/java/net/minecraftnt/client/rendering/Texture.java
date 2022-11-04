@@ -2,8 +2,8 @@ package net.minecraftnt.client.rendering;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
 import net.minecraftnt.client.data.resources.Resources;
-import net.minecraftnt.utility.Identifier;
-import net.minecraftnt.utility.Registry;
+import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.MemoryUtil;
@@ -67,8 +67,8 @@ public class Texture {
 
         glBindTexture(GL_TEXTURE_2D, handle);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 

@@ -1,9 +1,9 @@
 package net.minecraftnt.client.rendering;
 
 import net.minecraftnt.client.data.resources.Resources;
-import net.minecraftnt.utility.Identifier;
-import net.minecraftnt.utility.Registry;
-import net.minecraftnt.utility.maths.Matrix4;
+import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.Registry;
+import net.minecraftnt.util.maths.Matrix4;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
