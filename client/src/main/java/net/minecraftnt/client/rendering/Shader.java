@@ -1,6 +1,9 @@
 package net.minecraftnt.client.rendering;
 
 import net.minecraftnt.client.data.resources.Resources;
+import net.minecraftnt.utility.Identifier;
+import net.minecraftnt.utility.Registry;
+import net.minecraftnt.utility.maths.Matrix4;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,32 +12,77 @@ import java.util.HashMap;
 import static org.lwjgl.opengl.GL33C.*;
 
 public class Shader {
+
+    public static final Registry<Shader> REGISTRY = new Registry<>();
+
     public static final Logger LOGGER = LogManager.getLogger(Shader.class);
 
-    private int handle;
+    private static Shader current;
 
-    public static Shader loadFromName(String name){
-        String fShader = "";
-        if(Resources.exists("assets/shaders/" + name + "/fragment.frag"))
-            fShader =  Resources.readString("assets/shaders/" + name + "/fragment.frag");
-        else
-            fShader = Resources.readString("assets/shaders/default/fragment.frag");
-
-        String gShader = "";
-        if(Resources.exists("assets/shaders/" + name + "/geometry.geom"))
-            gShader =  Resources.readString("assets/shaders/" + name + "/geometry.geom");
-        else
-            gShader = Resources.readString("assets/shaders/default/geometry.geom");
-
-        String vShader = "";
-        if(Resources.exists("assets/shaders/" + name + "/vertex.vert"))
-            vShader = Resources.readString("assets/shaders/" + name + "/vertex.vert");
-        else
-            vShader = Resources.readString("assets/shaders/default/vertex.vert");
+    private final int handle;
+    private boolean exists = false;
 
 
+    private static String getShader(Identifier identifier, String file){
+        if(Resources.exists("assets/" + identifier.getNamespace() + "/shaders/" + identifier.getName() + file))
+            return Resources.readString("assets/" + identifier.getNamespace() + "/shaders/" + identifier.getName() + file);
+        return Resources.readString("assets/minecraftnt/shaders/default/" + file);
+    }
 
-        return new Shader(vShader, gShader, fShader);
+
+    public static Shader load(Identifier identifier){
+        Shader shader = new Shader(getShader(identifier, "vertex.vert"), getShader(identifier, "geometry.geom"), getShader(identifier, "fragment.frag"));
+
+        REGISTRY.register(identifier, shader);
+
+        return shader;
+    }
+
+    public static boolean bind(Identifier identifier) {
+
+        Shader shader = REGISTRY.get(identifier);
+
+        if(shader == null) {
+            LOGGER.warn("Fetching shader {} returned null!", identifier.toString());
+            return false;
+        }
+
+        shader.bind();
+        current = shader;
+        return true;
+    }
+
+    public static boolean setProjection(Matrix4 matrix) {
+        if(current == null) {
+            LOGGER.error("Cannot set projection of null shader");
+            return false;
+        }
+
+        glUniformMatrix4fv(current.getUniformLocation("projection"), false, matrix.getData());
+
+        return true;
+    }
+
+    public static boolean setView(Matrix4 matrix) {
+        if(current == null) {
+            LOGGER.error("Cannot set view of null shader");
+            return false;
+        }
+
+        glUniformMatrix4fv(current.getUniformLocation("view"), false, matrix.getData());
+
+        return true;
+    }
+
+    public static boolean setModel(Matrix4 matrix) {
+        if(current == null) {
+            LOGGER.error("Cannot set model of null shader");
+            return false;
+        }
+
+        glUniformMatrix4fv(current.getUniformLocation("model"), false, matrix.getData());
+
+        return true;
     }
 
     public Shader(String vertex, String geometry, String fragment){
@@ -43,7 +91,7 @@ public class Shader {
         glCompileShader(vertexID);
         String log = glGetShaderInfoLog(vertexID);
         if(!log.isEmpty()){
-            LOGGER.error("ERROR:VERTEX:COMPILATION:\n" + log);
+            LOGGER.error("Vertex shader compilation failed:\n" + log);
         }
 
         int geometryID = glCreateShader(GL_GEOMETRY_SHADER);
@@ -51,7 +99,7 @@ public class Shader {
         glCompileShader(geometryID);
         log = glGetShaderInfoLog(geometryID);
         if(!log.isEmpty()){
-            LOGGER.error("ERROR:GEOMETRY:COMPILATION:\n" + log);
+            LOGGER.error("Geometry shader compilation failed:\n" + log);
         }
 
         int fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -59,7 +107,7 @@ public class Shader {
         glCompileShader(fragmentID);
         log = glGetShaderInfoLog(fragmentID);
         if(!log.isEmpty()){
-            LOGGER.error("ERROR:FRAGMENT:COMPILATION:\n" + log);
+            LOGGER.error("Fragment shader compilation failed:\n" + log);
         }
 
         handle = glCreateProgram();
@@ -70,7 +118,7 @@ public class Shader {
 
         log = glGetProgramInfoLog(fragmentID);
         if(!log.isEmpty()){
-            LOGGER.error("ERROR:PROGRAM:LINKING:\n" + log);
+            LOGGER.error("Shader linking failed:\n" + log);
         }
 
         glDetachShader(handle, vertexID);
@@ -80,6 +128,8 @@ public class Shader {
         glDeleteShader(vertexID);
         glDeleteShader(geometryID);
         glDeleteShader(fragmentID);
+
+        exists = true;
     }
 
     public void bind() {
@@ -100,6 +150,12 @@ public class Shader {
 
 
     public void dispose()  {
+        if(!exists) {
+            LOGGER.fatal("Tried to dispose non-existent shader!");
+            throw new IllegalStateException("Cannot dispose disposed shader");
+        }
+
         glDeleteProgram(handle);
+        exists = false;
     }
 }

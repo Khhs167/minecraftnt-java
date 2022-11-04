@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.*;
+
+import org.lwjgl.glfw.GLFWWindowSizeCallbackI;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL33C.*;
 
@@ -13,12 +15,16 @@ public class Window {
     private static final Logger LOGGER = LogManager.getLogger(Window.class);
 
     private final long windowHandle;
+    private int width, height;
 
     public Window(int width, int height, String title){
         this(width, height, title, null);
     }
 
     public Window(int width, int height, String title, Window parent){
+
+        this.width = width;
+        this.height = height;
 
         if(!glfwInit()){
             LOGGER.fatal("GLFW initialization failed!");
@@ -49,9 +55,28 @@ public class Window {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glClearColor(0f, 0f, 0f, 1.0f);
-        //glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
+        glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
 
+        glfwSetWindowSizeCallback(windowHandle, this::windowResizeCallback);
+
+    }
+
+    private void windowResizeCallback(long window, int w, int h){
+        this.width = w;
+        this.height = h;
+        glViewport(0, 0, w, h);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public float getAspectRatio() {
+        return (float)width / (float)height;
     }
 
     public boolean stepFrame(){
@@ -61,7 +86,7 @@ public class Window {
 
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         return true;
 
@@ -72,4 +97,7 @@ public class Window {
         glfwTerminate();
     }
 
+    public float getTime() {
+        return (float)glfwGetTime();
+    }
 }
