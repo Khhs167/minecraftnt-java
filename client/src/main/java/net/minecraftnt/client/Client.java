@@ -1,10 +1,20 @@
 package net.minecraftnt.client;
 
+import net.minecraftnt.client.data.resources.Resources;
 import net.minecraftnt.client.platform.Window;
 import net.minecraftnt.client.rendering.*;
+import net.minecraftnt.nbt.NBTReader;
+import net.minecraftnt.nbt.NBTWriter;
+import net.minecraftnt.nbt.exceptions.UnexpectedNBTNodeException;
+import net.minecraftnt.nbt.nodes.NBTNode;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.maths.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class Client implements Runnable{
     private final Window window;
@@ -24,8 +34,9 @@ public class Client implements Runnable{
 
         RectangleMesh mesh = VoxelGenerator.generateVoxelMesh(FaceFlags.ALL_FACES);
 
-
+        System.out.println("Updating mesh");
         mesh.updateMesh();
+        System.out.println("Updated mesh");
 
 
         Transformation meshTransform = new Transformation();
@@ -37,6 +48,7 @@ public class Client implements Runnable{
         float targetRot = 90;
 
         while (window.stepFrame()){
+            //System.out.println(1f / window.getFrameTime());
             meshTransform.rotate(new Vector3(window.getFrameTime() * 90));
 
             Shader.bind(new Identifier("minecraftnt", "default"));
@@ -55,7 +67,42 @@ public class Client implements Runnable{
     }
 
     public static void main(String[] args){
-        Client client = new Client();
-        client.run();
+
+        // Time to test our NBT parser
+
+        try {
+            NBTReader reader = new NBTReader(Resources.readStream("bigtest.nbt"));
+            reader.parse();
+
+            NBTNode root = reader.getRoot();
+
+            System.out.println(root.toString());
+
+            FileOutputStream testfile = new FileOutputStream("test.nbt");
+            NBTWriter writer = new NBTWriter(testfile);
+            writer.beginCompound("TestShit");
+            writer.writeString("Name", "Amogus");
+            writer.beginList("Gigachads", "string");
+            writer.writeString("", "RedCube");
+            writer.endList();
+            writer.endCompound();
+
+            writer.flush();
+
+            NBTReader testReader = new NBTReader(new FileInputStream("test.nbt"));
+            testReader.parse();
+
+            root = testReader.getRoot();
+
+            System.out.println(root.toString());
+
+
+
+        } catch (IOException | UnexpectedNBTNodeException e) {
+            throw new RuntimeException(e);
+        }
+
+        /*Client client = new Client();
+        client.run();*/
     }
 }

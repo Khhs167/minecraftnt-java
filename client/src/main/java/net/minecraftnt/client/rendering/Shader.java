@@ -31,7 +31,7 @@ public class Shader {
 
 
     public static Shader load(Identifier identifier){
-        Shader shader = new Shader(getShader(identifier, "vertex.vert"), getShader(identifier, "geometry.geom"), getShader(identifier, "fragment.frag"));
+        Shader shader = new Shader(getShader(identifier, "vertex.vert"), getShader(identifier, "fragment.frag"));
 
         REGISTRY.register(identifier, shader);
 
@@ -85,21 +85,13 @@ public class Shader {
         return true;
     }
 
-    public Shader(String vertex, String geometry, String fragment){
+    public Shader(String vertex, String fragment){
         int vertexID = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexID, vertex);
         glCompileShader(vertexID);
         String log = glGetShaderInfoLog(vertexID);
         if(!log.isEmpty()){
             LOGGER.error("Vertex shader compilation failed:\n" + log);
-        }
-
-        int geometryID = glCreateShader(GL_GEOMETRY_SHADER);
-        glShaderSource(geometryID, geometry);
-        glCompileShader(geometryID);
-        log = glGetShaderInfoLog(geometryID);
-        if(!log.isEmpty()){
-            LOGGER.error("Geometry shader compilation failed:\n" + log);
         }
 
         int fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -112,7 +104,6 @@ public class Shader {
 
         handle = glCreateProgram();
         glAttachShader(handle, vertexID);
-        glAttachShader(handle, geometryID);
         glAttachShader(handle, fragmentID);
         glLinkProgram(handle);
 
@@ -122,11 +113,9 @@ public class Shader {
         }
 
         glDetachShader(handle, vertexID);
-        glDetachShader(handle, geometryID);
         glDetachShader(handle, fragmentID);
 
         glDeleteShader(vertexID);
-        glDeleteShader(geometryID);
         glDeleteShader(fragmentID);
 
         exists = true;

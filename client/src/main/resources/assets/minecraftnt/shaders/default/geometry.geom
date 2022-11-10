@@ -1,5 +1,5 @@
 #version 330 core
-layout (points) in;
+/*layout (points) in;
 layout (triangle_strip, max_vertices = 5) out;
 out vec2 UV;
 
@@ -29,15 +29,6 @@ const orientation_t orientations[6] = orientation_t[6](
     orientation_t(vec3(1, 0, 0), vec3(0, 0, 1))  // XZ - bottom
 );
 
-/*const orientation_t orientations[6] = orientation_t[6](
-    orientation_t(vec3(0, 1, 0), vec3(1, 0, 0)),
-    orientation_t(vec3(0, 1, 0), vec3(1, 0, 0)),
-    orientation_t(vec3(0, 1, 0), vec3(1, 0, 0)),
-    orientation_t(vec3(0, 1, 0), vec3(1, 0, 0)),
-    orientation_t(vec3(0, 1, 0), vec3(1, 0, 0)),
-    orientation_t(vec3(0, 1, 0), vec3(1, 0, 0))
-);*/
-
 
 void main() {
     vec4 position = gl_in[0].gl_Position;
@@ -62,4 +53,4 @@ void main() {
     UV = uv + uv_size;
     EmitVertex();
     EndPrimitive();
-}
+}*/

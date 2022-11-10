@@ -8,7 +8,7 @@ public class RectangleMesh {
     private final int VAO;
     private final int VBO;
 
-    public LinkedList<Quad> quads = new LinkedList<>();
+    public Quad[] quads = new Quad[0];
     private int quads_baked = 0;
 
 
@@ -21,25 +21,33 @@ public class RectangleMesh {
 
     }
 
+    private void setCorner(int start, int quad, int corner, float[] data) {
+        data[start] = quads[quad].positions()[0].getX();
+        data[start + 1] = quads[corner].positions()[0].getY();
+        data[start + 2] = quads[corner].positions()[0].getZ();
+        data[start + 3] = quads[corner].uv()[0].getX();
+        data[start + 4] = quads[corner].uv()[0].getY();
+        data[start + 5] = quads[corner].lighting();
+    }
+
     public void updateMesh() {
+        final int size = 6 * 6;
+        float[] vertex_data = new float[size * quads.length];
 
-        float[] vertex_data = new float[Quad.SIZE * quads.size()];
+        for(int i = 0; i < quads.length; i++){
 
-        for(int i = 0; i < quads.size(); i++){
-            vertex_data[i * Quad.SIZE + Quad.POSITION_OFFSET] = quads.get(i).position.getX();
-            vertex_data[i * Quad.SIZE + Quad.POSITION_OFFSET + 1] = quads.get(i).position.getY();
-            vertex_data[i * Quad.SIZE + Quad.POSITION_OFFSET + 2] = quads.get(i).position.getZ();
+            // Triangle 1
 
-            vertex_data[i * Quad.SIZE + Quad.SIZE_OFFSET] = quads.get(i).size.getX();
-            vertex_data[i * Quad.SIZE + Quad.SIZE_OFFSET + 1] = quads.get(i).size.getY();
+            setCorner(i * size, i, 0, vertex_data);
+            setCorner(i * size + 6, i, 1, vertex_data);
+            setCorner(i * size + 12, i, 4, vertex_data);
 
-            vertex_data[i * Quad.SIZE + Quad.UV_ORIGIN_OFFSET] = quads.get(i).uvOrigin.getX();
-            vertex_data[i * Quad.SIZE + Quad.UV_ORIGIN_OFFSET + 1] = quads.get(i).uvOrigin.getY();
 
-            vertex_data[i * Quad.SIZE + Quad.UV_SIZE_OFFSET] = quads.get(i).uvSize.getX();
-            vertex_data[i * Quad.SIZE + Quad.UV_SIZE_OFFSET + 1] = quads.get(i).uvSize.getY();
+            // Triangle 2
 
-            vertex_data[i * Quad.SIZE + Quad.ORIENTATION_OFFSET] = quads.get(i).orientation;
+            setCorner(i * size + 18, i, 0, vertex_data);
+            setCorner(i * size + 24, i, 1, vertex_data);
+            setCorner(i * size + 30, i, 4, vertex_data);
         }
 
 
@@ -49,25 +57,17 @@ public class RectangleMesh {
         glBufferData(GL_ARRAY_BUFFER, vertex_data, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, Quad.SIZE * Quad.VALUE_SIZE, Quad.POSITION_OFFSET * Quad.VALUE_SIZE);
-
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, size * Float.BYTES, 0);
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, Quad.SIZE * Quad.VALUE_SIZE, Quad.SIZE_OFFSET * Quad.VALUE_SIZE);
-
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, size * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, false, Quad.SIZE * Quad.VALUE_SIZE, Quad.UV_ORIGIN_OFFSET * Quad.VALUE_SIZE);
+        glVertexAttribPointer(2, 1, GL_FLOAT, false, size * Float.BYTES, 5 * Float.BYTES);
 
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 2, GL_FLOAT, false, Quad.SIZE * Quad.VALUE_SIZE, Quad.UV_SIZE_OFFSET * Quad.VALUE_SIZE);
-
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 1, GL_FLOAT, false, Quad.SIZE * Quad.VALUE_SIZE, Quad.ORIENTATION_OFFSET * Quad.VALUE_SIZE);
-
-        quads_baked = quads.size();
+        quads_baked = quads.length;
     }
 
     public void render() {
         glBindVertexArray(VAO);
-        glDrawArrays(GL_POINTS, 0, quads_baked);
+        glDrawArrays(GL_TRIANGLES, 0, quads_baked);
     }
 }
