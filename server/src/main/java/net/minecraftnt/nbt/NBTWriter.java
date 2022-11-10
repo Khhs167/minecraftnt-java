@@ -55,6 +55,79 @@ public class NBTWriter {
         addNode(store);
     }
 
+    public void writeInt(String name, int value){
+        NBTDataStore<Integer> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "int";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeByte(String name, byte value){
+        NBTDataStore<Byte> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "byte";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeShort(String name, short value){
+        NBTDataStore<Short> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "short";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeLong(String name, long value){
+        NBTDataStore<Long> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "long";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeFloat(String name, float value){
+        NBTDataStore<Float> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "float";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeDouble(String name, double value){
+        NBTDataStore<Double> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "double";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeBytes(String name, byte[] value){
+        NBTDataStore<byte[]> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "byte[]";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeInts(String name, int[] value){
+        NBTDataStore<int[]> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "int[]";
+        store.name = name;
+        addNode(store);
+    }
+
+    public void writeLongs(String name, long[] value){
+        NBTDataStore<long[]> store = new NBTDataStore<>();
+        store.value = value;
+        store.type = "long[]";
+        store.name = name;
+        addNode(store);
+    }
+
+
     public void addNode(NBTNodeStore store) {
         if(!nodeStack.empty() && Objects.equals(nodeStack.peek().type, "list")) {
             ((NBTChildStore) nodeStack.peek()).length++;
@@ -99,21 +172,19 @@ public class NBTWriter {
                     outputStream.writeInt(((NBTChildStore)nodeStore).length);
                     break;
                 case "byte[]":
-                    Byte[] byteData = ((NBTDataStore<Byte[]>)nodeStore).value;
+                    byte[] byteData = ((NBTDataStore<byte[]>)nodeStore).value;
                     outputStream.writeInt(byteData.length);
-                    for (int i = 0; i < byteData.length; i++){
-                        outputStream.writeByte(byteData[i]);
-                    }
+                    outputStream.write(byteData);
                     break;
                 case "int[]":
-                    Integer[] intData = ((NBTDataStore<Integer[]>)nodeStore).value;
+                    int[] intData = ((NBTDataStore<int[]>)nodeStore).value;
                     outputStream.writeInt(intData.length);
                     for (int i = 0; i < intData.length; i++){
                         outputStream.writeInt(intData[i]);
                     }
                     break;
                 case "long[]":
-                    Long[] longData = ((NBTDataStore<Long[]>)nodeStore).value;
+                    long[] longData = ((NBTDataStore<long[]>)nodeStore).value;
                     outputStream.writeInt(longData.length);
                     for (int i = 0; i < longData.length; i++){
                         outputStream.writeLong(longData[i]);
