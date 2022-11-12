@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group 'net.minecraft'
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+project.ext.jomlVersion = "1.10.5"
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation "org.joml:joml:${jomlVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,12 +1,18 @@
 package net.minecraftnt.nbt;
 
-import net.minecraftnt.nbt.writing.*;
+import net.minecraftnt.nbt.writing.NBTChildStore;
+import net.minecraftnt.nbt.writing.NBTDataStore;
+import net.minecraftnt.nbt.writing.NBTNodeStore;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StreamCorruptedException;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.zip.GZIPOutputStream;
 
 public class NBTWriter {
@@ -28,8 +34,8 @@ public class NBTWriter {
 
     public void endCompound() {
         NBTNodeStore store = new NBTNodeStore();
-        store.type = "end";
         store.name = "";
+        store.type = "end";
         addNode(store);
         nodeStack.pop();
     }
@@ -141,8 +147,10 @@ public class NBTWriter {
         for (NBTNodeStore nodeStore : nodes){
             if(!nodeStore.isInList) {
                 outputStream.writeByte(getNodeType(nodeStore.type));
-                outputStream.writeShort(nodeStore.name.length());
-                outputStream.writeBytes(nodeStore.name);
+                if (nodeStore.type != "end") {
+                    outputStream.writeShort(nodeStore.name.length());
+                    outputStream.writeBytes(nodeStore.name);
+                }
             }
             switch (nodeStore.type){
                 case "byte":
@@ -164,8 +172,9 @@ public class NBTWriter {
                     outputStream.writeDouble(((NBTDataStore<Double>)nodeStore).value);
                     break;
                 case "string":
-                    outputStream.writeShort(((NBTDataStore<String>)nodeStore).value.length());
-                    outputStream.writeBytes(((NBTDataStore<String>)nodeStore).value);
+                    byte[] stringBytes = ((NBTDataStore<String>)nodeStore).value.getBytes(StandardCharsets.UTF_8);
+                    outputStream.writeShort(stringBytes.length);
+                    outputStream.write(stringBytes);
                     break;
                 case "list":
                     outputStream.writeByte(getNodeType(((NBTChildStore)nodeStore).listDataType));
@@ -201,7 +210,7 @@ public class NBTWriter {
 
     }
 
-    private byte getNodeType(String type) throws StreamCorruptedException {
+    private byte getNodeType(String type) {
         return switch (type) {
             case "end" -> 0;
             case "byte" -> 1;

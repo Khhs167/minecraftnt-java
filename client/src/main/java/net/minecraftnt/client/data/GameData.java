@@ -7,7 +7,7 @@ public class GameData {
     public static String getGameDirectory() {
         String home_dir = System.getProperty("user.home");
 
-        Path path = Path.of(home_dir, ".khhs", "minecraftnt");
+        Path path = Path.of(home_dir, ".khhs", "net/minecraftnt");
 
         File gameDir = path.toFile();
 

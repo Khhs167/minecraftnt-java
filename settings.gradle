@@ -2,3 +2,6 @@ rootProject.name = 'minecraftnt'
 
 include 'client'
 include 'server'
+include 'nbtedit'
+include 'util'
+

@@ -62,6 +62,7 @@ version '2.0'
 
 dependencies {
     implementation project(':server')
+    implementation project(':util')
 
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'

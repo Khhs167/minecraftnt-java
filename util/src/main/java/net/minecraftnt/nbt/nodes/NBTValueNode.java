@@ -1,6 +1,6 @@
 package net.minecraftnt.nbt.nodes;
 
-public class NBTValueNode<T> extends NBTNode{
+public class NBTValueNode<T> extends NBTNode {
 
     private T value;
 

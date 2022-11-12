@@ -1,7 +1,12 @@
 package net.minecraftnt.nbt;
+
 import net.minecraftnt.nbt.exceptions.UnexpectedNBTNodeException;
 import net.minecraftnt.nbt.nodes.*;
-import java.io.*;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
@@ -237,6 +242,7 @@ public class NBTReader {
         String childType = getNodeType(type);
         int length = inputStream.readInt();
         node.setType("list");
+        node.setContentType(childType);
 
         NBTNode[] nodes = new NBTNode[length];
 
