@@ -1,0 +1,29 @@
+{
+  "namespace": "minecraftnt",
+  "size":{
+    "x": 16,
+    "y": 16
+  },
+  "tiles": {
+    "atlas.null": {
+      "x": 0,
+      "y": 0
+    },
+    "atlas.grass.top": {
+      "x": 0,
+      "y": 15
+    },
+    "atlas.grass.side": {
+      "x": 3,
+      "y": 15
+    },
+    "atlas.dirt": {
+      "x": 2,
+      "y": 15
+    },
+    "atlas.stone": {
+      "x": 1,
+      "y": 15
+    }
+  }
+}

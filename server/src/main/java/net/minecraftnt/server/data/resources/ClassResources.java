@@ -1,4 +1,4 @@
-package net.minecraftnt.client.data.resources;
+package net.minecraftnt.server.data.resources;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

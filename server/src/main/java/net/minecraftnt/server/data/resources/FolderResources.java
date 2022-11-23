@@ -1,6 +1,7 @@
-package net.minecraftnt.client.data.resources;
+package net.minecraftnt.server.data.resources;
 
-import net.minecraftnt.client.data.GameData;
+import net.minecraftnt.server.data.GameData;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 

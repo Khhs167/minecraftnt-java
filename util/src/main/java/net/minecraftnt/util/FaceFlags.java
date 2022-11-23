@@ -1,5 +1,10 @@
 package net.minecraftnt.util;
 
+import java.util.Collection;
+
+import static net.minecraftnt.util.FaceFlags.Faces.*;
+import static net.minecraftnt.util.FaceFlags.Faces.FACE_BOTTOM;
+
 public class FaceFlags {
 
 
@@ -11,9 +16,24 @@ public class FaceFlags {
     public static final Faces FACE_BOTTOM = Faces.FACE_BOTTOM;
     public static final FaceFlags ALL_FACES = new FaceFlags(Faces.FACE_FRONT, Faces.FACE_RIGHT, Faces.FACE_BACK, Faces.FACE_LEFT, Faces.FACE_TOP, Faces.FACE_BOTTOM);
 
+    public static final Faces[] FACES_LIST = new FaceFlags.Faces[]{
+            FACE_FRONT,
+            FACE_RIGHT,
+            FACE_BACK,
+            FACE_LEFT,
+            FACE_TOP,
+            FACE_BOTTOM
+    };
+
     private short value;
 
     public FaceFlags(Faces... values){
+        for (Faces faces : values) {
+            value |= faces.value;
+        }
+    }
+
+    public FaceFlags(Collection<Faces> values){
         for (Faces faces : values) {
             value |= faces.value;
         }

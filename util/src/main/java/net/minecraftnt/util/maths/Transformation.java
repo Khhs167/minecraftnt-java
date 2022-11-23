@@ -70,4 +70,33 @@ public class Transformation {
         setPosition(new Vector3(this.position.getX(), this.position.getY(), position));
         return this;
     }
+
+    public Vector3 forward(){
+        float X = (float) (Math.sin(Math.toRadians(rotation.getY())) * Math.cos(Math.toRadians(rotation.getX())));
+        float Y = (float) Math.sin(Math.toRadians(-rotation.getX()));
+        float Z = (float) (Math.cos(Math.toRadians(rotation.getX())) * Math.cos(Math.toRadians(rotation.getY())));
+
+        return new Vector3(X, Y, Z).normalized();
+    }
+
+    public Vector3 right(){
+        float X = (float) (Math.sin(Math.toRadians(rotation.getY() + 90)) * Math.cos(Math.toRadians(rotation.getX())));
+        float Y = (float) Math.sin(Math.toRadians(-rotation.getX()));
+        float Z = (float) (Math.cos(Math.toRadians(rotation.getX())) * Math.cos(Math.toRadians(rotation.getY() + 90)));
+
+        return new Vector3(X, Y, Z).normalized();
+    }
+
+    public Vector3 up(){
+        float X = (float) (Math.sin(Math.toRadians(rotation.getY())) * Math.cos(Math.toRadians(rotation.getX() + 90)));
+        float Y = (float) Math.sin(Math.toRadians(-rotation.getX() + 90));
+        float Z = (float) (Math.cos(Math.toRadians(rotation.getX() + 90)) * Math.cos(Math.toRadians(rotation.getY())));
+
+        return new Vector3(X, Y, Z).normalized();
+    }
+
+    public Transformation move(Vector3 movement){
+        position = position.add(movement);
+        return this;
+    }
 }

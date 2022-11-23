@@ -4,8 +4,18 @@ uniform sampler2D texture;
 
 out vec4 FragColor;
 
-in vec2 UV;
+in struct VertexData {
+    vec3 position;
+    vec2 uv;
+    float lighting;
+} Vertex;
 
 void main() {
-    FragColor = texture2D(texture, UV).rgba;
+    vec4 texture_color = texture2D(texture, Vertex.uv);
+
+    float lighting = (Vertex.lighting * 0.9f) + 0.1f;
+
+    vec4 shaded_color = vec4(texture_color.rgb * lighting, texture_color.a);
+
+    FragColor = shaded_color;
 }

@@ -1,4 +1,4 @@
-package net.minecraftnt.client.data;
+package net.minecraftnt.server.data;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -34,4 +34,15 @@ public class GameData {
         return Path.of(getResourceDirectory(), resource).toAbsolutePath().toString();
     }
 
+    public static String getModsDirectory() {
+        Path path = Path.of(getGameDirectory(), "mods");
+
+        File resourceDir = path.toFile();
+
+        if(!resourceDir.exists())
+            if(!resourceDir.mkdirs())
+                throw new RuntimeException("Could not create mod directory!");
+
+        return path.toAbsolutePath().toString();
+    }
 }

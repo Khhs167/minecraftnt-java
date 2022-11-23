@@ -41,6 +41,11 @@ public class Registry<T> {
         return value;
     }
 
+    public Identifier registerImmediate(Identifier identifier, T value) {
+        register(identifier, value);
+        return identifier;
+    }
+
     public Collection<T> values() {
         return registry_data.values();
     }

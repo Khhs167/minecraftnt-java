@@ -1,4 +1,4 @@
-package net.minecraftnt.client.data.resources;
+package net.minecraftnt.server.data.resources;
 
 public class PackInfo {
     public final String name;

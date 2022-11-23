@@ -1,0 +1,12 @@
+[Loader]
+SharedLoader='net.minecraftnt.GameLoader'
+ClientLoader='net.minecraftnt.client.GameLoader'
+# ServerLoader='foo.bar.spam'
+
+[Information]
+Author='khhs'
+AuthorSite='https://openability.tech/jimmster'
+ProjectSite='https://example.com'
+Name='Minecraftnt'
+
+[Compatability]
