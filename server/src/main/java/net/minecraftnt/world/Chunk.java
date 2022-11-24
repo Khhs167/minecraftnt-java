@@ -2,18 +2,18 @@ package net.minecraftnt.world;
 
 import net.minecraftnt.MinecraftntData;
 import net.minecraftnt.Registries;
-import net.minecraftnt.builtin.Grass;
 import net.minecraftnt.rendering.Mesh;
+import net.minecraftnt.rendering.Renderer;
 import net.minecraftnt.rendering.ShapeGenerator;
 import net.minecraftnt.rendering.Vertex;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.maths.Transformation;
 import net.minecraftnt.util.maths.Vector3;
 import net.minecraftnt.util.maths.VoxelPosition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 public class Chunk {
 
@@ -24,10 +24,16 @@ public class Chunk {
     private HashMap<Short, Identifier> blockMap = new HashMap<>();
     private HashMap<Identifier, Short> idMap = new HashMap<>();
     public Mesh mesh;
+    public Transformation transformation;
+    public boolean dirty = false;
 
     public Chunk() {
         blockMap.put((short)0, Block.AIR);
         idMap.put(Block.AIR, (short)0);
+        transformation = new Transformation();
+        if(MinecraftntData.isClient()) {
+            mesh = Renderer.createMeshC();
+        }
     }
 
     private boolean isInside(int x, int y, int z) {
@@ -100,6 +106,6 @@ public class Chunk {
             }
         }
 
-        mesh.vertices = vertices.toArray(new Vertex[0]);
+        mesh.setVertices(vertices.toArray(new Vertex[0]));
     }
 }

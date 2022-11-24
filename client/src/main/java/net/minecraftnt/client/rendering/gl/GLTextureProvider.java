@@ -1,11 +1,17 @@
 package net.minecraftnt.client.rendering.gl;
 
+import de.matthiasmann.twl.utils.PNGDecoder;
 import net.minecraftnt.Registries;
-import net.minecraftnt.client.rendering.TextureProvider;
+import net.minecraftnt.rendering.TextureProvider;
 import net.minecraftnt.rendering.Texture;
+import net.minecraftnt.server.data.resources.Resources;
 import net.minecraftnt.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.system.MemoryUtil;
+
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL33C.*;
 
@@ -13,6 +19,25 @@ public final class GLTextureProvider extends TextureProvider {
 
 
     public static final Logger LOGGER = LogManager.getLogger(GLTextureProvider.class);
+
+    public static TextureData readData(Identifier identifier){
+        try {
+
+            InputStream stream = Resources.readStream("assets/" + identifier.getNamespace() + "/textures/" + identifier.getName() + ".png");
+            PNGDecoder decoder = new PNGDecoder(stream);
+            ByteBuffer buffer = MemoryUtil.memAlloc(4 * decoder.getHeight() * decoder.getWidth());
+            decoder.decodeFlipped(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+            buffer.flip();
+
+
+
+            return new TextureData(buffer, decoder.getWidth(), decoder.getHeight());
+
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage());
+            return null;
+        }
+    }
 
     public Texture load(Identifier identifier){
 

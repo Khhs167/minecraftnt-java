@@ -1,9 +1,9 @@
 package net.minecraftnt.client.rendering.gl;
 
-import net.minecraftnt.client.rendering.MeshProvider;
-import net.minecraftnt.client.rendering.Renderer;
-import net.minecraftnt.client.rendering.ShaderProvider;
-import net.minecraftnt.client.rendering.TextureProvider;
+import net.minecraftnt.rendering.MeshProvider;
+import net.minecraftnt.rendering.Renderer;
+import net.minecraftnt.rendering.ShaderProvider;
+import net.minecraftnt.rendering.TextureProvider;
 
 public class GLRenderer extends Renderer {
 

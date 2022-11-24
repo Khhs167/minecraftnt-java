@@ -1,7 +1,7 @@
 package net.minecraftnt.client.rendering.gl;
 
 import net.minecraftnt.Registries;
-import net.minecraftnt.client.rendering.ShaderProvider;
+import net.minecraftnt.rendering.ShaderProvider;
 import net.minecraftnt.rendering.Shader;
 import net.minecraftnt.server.data.resources.Resources;
 import net.minecraftnt.util.Identifier;

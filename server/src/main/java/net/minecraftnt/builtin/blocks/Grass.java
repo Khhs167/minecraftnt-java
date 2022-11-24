@@ -1,4 +1,4 @@
-package net.minecraftnt.builtin;
+package net.minecraftnt.builtin.blocks;
 
 import net.minecraftnt.rendering.TextureAtlasLocation;
 import net.minecraftnt.util.FaceFlags;

@@ -1,6 +1,8 @@
-package net.minecraftnt.client.rendering;
+package net.minecraftnt.rendering;
 
-import net.minecraftnt.rendering.Mesh;
+import net.minecraftnt.Registries;
+import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.Registry;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -12,13 +14,14 @@ public abstract class Renderer {
         return instance;
     }
 
-    public static Renderer create(RenderAPI api) {
-        try {
-            instance = (Renderer) api.renderer.getDeclaredConstructor().newInstance();
-            return instance;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+    public static Renderer create(Identifier identifier) {
+
+        RenderAPI api = Registries.RENDER_API.get(identifier);
+
+        instance = api.renderer;
+
+        return instance;
+
     }
 
     public abstract ShaderProvider shaderProvider();

@@ -1,4 +1,4 @@
-package net.minecraftnt.client.rendering;
+package net.minecraftnt.rendering;
 
 import net.minecraftnt.rendering.Mesh;
 import net.minecraftnt.rendering.Vertex;

@@ -1,11 +1,8 @@
 package net.minecraftnt.client;
 
 import net.minecraftnt.ModLoader;
-import net.minecraftnt.Registries;
-import net.minecraftnt.builtin.Air;
-import net.minecraftnt.builtin.Grass;
-import net.minecraftnt.client.rendering.RenderAPI;
-import net.minecraftnt.client.rendering.Renderer;
+import net.minecraftnt.rendering.RenderAPI;
+import net.minecraftnt.rendering.Renderer;
 import net.minecraftnt.rendering.Shader;
 import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.maths.FastNoiseLite;
@@ -15,6 +12,8 @@ import net.minecraftnt.util.maths.Vector3;
 import net.minecraftnt.client.platform.Window;
 import net.minecraftnt.world.Block;
 import net.minecraftnt.world.Chunk;
+import net.minecraftnt.world.IWorldGenerator;
+import net.minecraftnt.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,39 +28,13 @@ public class Client implements Runnable{
 
     @Override
     public void run() {
-
-        Renderer.create(RenderAPI.OPENGL);
-
         ModLoader modLoader = new ModLoader();
         modLoader.loadMods();
 
-        Chunk c = new Chunk();
-        c.mesh = Renderer.createMeshC();
+        //Renderer.create(RenderAPI.OPENGL);
 
-        FastNoiseLite fastNoiseLite = new FastNoiseLite();
-        for(int x = 0; x < Chunk.CHUNK_WIDTH; x++){
-            for(int z = 0; z < Chunk.CHUNK_WIDTH; z++){
-                int height = 40 + (int)(fastNoiseLite.GetNoise(x, z) * 10);
-                for(int y = 0; y < height; y++){
-                    if(y < height - 3)
-                        c.setBlock(x, y, z, Block.STONE);
-                    else if(y < height - 1)
-                        c.setBlock(x, y, z, Block.DIRT);
-                    else
-                        c.setBlock(x, y, z, Block.GRASS);
-                }
+        World world = new World(IWorldGenerator.OVERWORLD);
 
-
-            }
-        }
-
-
-
-        c.generateMesh();
-        Renderer.updateMeshC(c.mesh);
-
-
-        Transformation meshTransform = new Transformation();
         Transformation cameraTransform = new Transformation();
 
         cameraTransform.setPosition(new Vector3(5,  50, -15));
@@ -96,13 +69,13 @@ public class Client implements Runnable{
 
 
             Renderer.shaderProviderC().setProjection(Matrix4.perspective(90, window.getAspectRatio(), 0.01f, 1000f));
-            Renderer.shaderProviderC().setModel(meshTransform.getMatrix());
             Renderer.shaderProviderC().setView(cameraTransform.getMatrix());
 
             Renderer.shaderProviderC().setFloat("time", window.getTime());
 
             Renderer.textureProviderC().bind(new Identifier("minecraftnt", "terrain"), 0);
-            Renderer.renderMeshC(c.mesh);
+
+            world.render();
         }
 
 

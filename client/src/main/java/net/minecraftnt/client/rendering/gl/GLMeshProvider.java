@@ -1,6 +1,6 @@
 package net.minecraftnt.client.rendering.gl;
 
-import net.minecraftnt.client.rendering.MeshProvider;
+import net.minecraftnt.rendering.MeshProvider;
 import net.minecraftnt.rendering.Mesh;
 
 import static org.lwjgl.opengl.GL33C.*;
