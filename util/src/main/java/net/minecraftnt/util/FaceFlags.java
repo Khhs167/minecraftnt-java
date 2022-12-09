@@ -38,7 +38,9 @@ public class FaceFlags {
             value |= faces.value;
         }
     }
-
+    public void setFace(Faces face){
+        value |= face.value;
+    }
     public boolean hasFace(Faces face){
         return (value & face.value) != 0;
     }

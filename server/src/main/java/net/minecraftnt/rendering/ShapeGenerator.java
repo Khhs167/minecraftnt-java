@@ -3,9 +3,8 @@ package net.minecraftnt.rendering;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.maths.Vector3;
-import net.minecraftnt.world.Block;
+import net.minecraftnt.server.world.Block;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public interface ShapeGenerator {

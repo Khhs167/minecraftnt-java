@@ -6,11 +6,13 @@ public class Identifier {
 
     private final String namespace;
     private final String name;
+    private final int hash;
 
 
     public Identifier(String namespace, String name){
         this.namespace = namespace;
         this.name = name;
+        hash = Objects.hash(namespace + ":" + name);
     }
 
 
@@ -25,14 +27,14 @@ public class Identifier {
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof Identifier other){
-            return Objects.equals(other.namespace, namespace) && Objects.equals(other.name, name);
+            return hash == other.hash;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(namespace, name);
+        return hash;
     }
 
     @Override

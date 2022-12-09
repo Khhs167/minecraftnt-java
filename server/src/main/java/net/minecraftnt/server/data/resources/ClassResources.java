@@ -52,7 +52,7 @@ public class ClassResources {
         try{
             bytes = stream.readAllBytes();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.throwing(e);
         }
 
         return bytes;

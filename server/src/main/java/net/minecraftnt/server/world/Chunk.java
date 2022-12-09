@@ -1,42 +1,55 @@
-package net.minecraftnt.world;
+package net.minecraftnt.server.world;
 
 import net.minecraftnt.MinecraftntData;
 import net.minecraftnt.Registries;
-import net.minecraftnt.rendering.Mesh;
-import net.minecraftnt.rendering.Renderer;
-import net.minecraftnt.rendering.ShapeGenerator;
-import net.minecraftnt.rendering.Vertex;
+import net.minecraftnt.rendering.*;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.maths.Transformation;
 import net.minecraftnt.util.maths.Vector3;
 import net.minecraftnt.util.maths.VoxelPosition;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Chunk {
-
+    public static final Logger LOGGER = LogManager.getLogger(Chunk.class);
     public static final int CHUNK_WIDTH = 16;
     public static final int CHUNK_HEIGHT = 256;
 
     private short[][][] map = new short[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+    private float[][][] illuminationMap = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
     private HashMap<Short, Identifier> blockMap = new HashMap<>();
     private HashMap<Identifier, Short> idMap = new HashMap<>();
     public Mesh mesh;
     public Transformation transformation;
     public boolean dirty = false;
+    public World world;
+    private final ChunkPosition position;
 
-    public Chunk() {
+    public ChunkPosition getPosition() {
+        return position;
+    }
+
+    public Chunk(ChunkPosition position) {
+        this.position = position;
         blockMap.put((short)0, Block.AIR);
         idMap.put(Block.AIR, (short)0);
         transformation = new Transformation();
-        if(MinecraftntData.isClient()) {
-            mesh = Renderer.createMeshC();
-        }
     }
 
-    private boolean isInside(int x, int y, int z) {
+    public HashMap<Short, Identifier> getBlockMap() {
+        return blockMap;
+    }
+
+    public void setBlockID(Short id, Identifier identifier) {
+        blockMap.put(id, identifier);
+        idMap.put(identifier, id);
+    }
+
+    public boolean isInside(int x, int y, int z) {
         return  x >= 0 && x < CHUNK_WIDTH &&
                 y >= 0 && y < CHUNK_HEIGHT &&
                 z >= 0 && z < CHUNK_WIDTH;
@@ -44,23 +57,23 @@ public class Chunk {
 
     public Short getID(int x, int y, int z) {
         if(!isInside(x, y, z))
-            return 0;
+            return idMap.get(world.getBlock(position.getX() * CHUNK_WIDTH + x, y, position.getY() * CHUNK_WIDTH + z));
 
         return map[x][y][z];
     }
 
-    public Block getBlock(int x, int y, int z) {
+    public Identifier getBlockID(int x, int y, int z) {
         if(!isInside(x, y, z))
-            return new Block() {
-            };
+            world.getBlock(position.getX() * CHUNK_WIDTH + x, y, position.getY() * CHUNK_WIDTH + z);
 
-        return Registries.BLOCKS.get(blockMap.get(getID(x, y, z)));
+        return blockMap.get(getID(x, y, z));
+    }
+
+    public Block getBlock(int x, int y, int z) {
+        return Registries.BLOCKS.get(getBlockID(x, y, z));
     }
 
     public boolean getSolid(int x, int y, int z) {
-        if(!isInside(x, y, z))
-            return false;
-
         return getBlock(x, y, z).isSolid();
     }
 
@@ -71,6 +84,10 @@ public class Chunk {
             idMap.put(identifier, id);
         }
         map[x][y][z] = idMap.get(identifier);
+    }
+
+    public void setBlock(int x, int y, int z, Short id) {
+        map[x][y][z] = id;
     }
 
     private final VoxelPosition[] faceChecks = {
@@ -86,6 +103,8 @@ public class Chunk {
         if(!MinecraftntData.isClient())
             return;
 
+        //LOGGER.debug("Regenerating chunk mesh");
+
         ArrayList<Vertex> vertices = new ArrayList<>();
 
         for(int x = 0; x < CHUNK_WIDTH; x++){
@@ -93,19 +112,25 @@ public class Chunk {
                 for(int y = 0; y < CHUNK_HEIGHT; y++){
                     if(!getSolid(x, y, z))
                         continue;
-                    ArrayList<FaceFlags.Faces> faces = new ArrayList<>();
+                    FaceFlags faces = new FaceFlags();
 
                     for(int i = 0; i < 6; i++){
-                        VoxelPosition facePos = new VoxelPosition(x, y, z).add(faceChecks[i]);
-                        if(!getSolid(facePos.getX(), facePos.getY(), facePos.getZ()))
-                            faces.add(FaceFlags.FACES_LIST[i]);
+                        VoxelPosition checkPos = faceChecks[i];
+                        if(!getSolid(x + checkPos.getX(), y + checkPos.getY(), z + checkPos.getZ()))
+                            faces.setFace(FaceFlags.FACES_LIST[i]);
                     }
 
-                    vertices.addAll(Registries.SHAPE_GENERATOR.get(ShapeGenerator.BLOCK).generateShape(new FaceFlags(faces), new Vector3(x, y, z), getBlock(x, y, z)));
+                    vertices.addAll(Registries.SHAPE_GENERATOR.get(ShapeGenerator.BLOCK).generateShape(faces, new Vector3(x, y, z), getBlock(x, y, z)));
                 }
             }
         }
 
         mesh.setVertices(vertices.toArray(new Vertex[0]));
+    }
+
+    public float getIllumination(int x, int y, int z) {
+        if(!isInside(x, y, z))
+            return -1; // TODO: World check lol
+        return illuminationMap[x][y][z];
     }
 }

@@ -6,9 +6,16 @@ import net.minecraftnt.builtin.blocks.Air;
 import net.minecraftnt.builtin.blocks.Dirt;
 import net.minecraftnt.builtin.blocks.Grass;
 import net.minecraftnt.builtin.blocks.Stone;
-import net.minecraftnt.world.Block;
-import net.minecraftnt.world.IBiomeGenerator;
-import net.minecraftnt.world.IWorldGenerator;
+import net.minecraftnt.networking.NBTPacket;
+import net.minecraftnt.networking.Packet;
+import net.minecraftnt.networking.PacketFactory;
+import net.minecraftnt.networking.PacketListener;
+import net.minecraftnt.server.packets.ChunkRequestPacket;
+import net.minecraftnt.server.packets.ChunksPacket;
+import net.minecraftnt.server.packets.ConnectPacket;
+import net.minecraftnt.server.world.Block;
+import net.minecraftnt.server.world.BiomeGenerator;
+import net.minecraftnt.server.world.WorldGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,8 +30,13 @@ public class GameLoader extends ModLoadingImplementation {
         Registries.BLOCKS.register(Block.STONE, new Stone());
 
         LOGGER.info("Loading world generation");
-        TerrainGenerator terrainGenerator = new TerrainGenerator();
-        Registries.WORLD_GENERATOR.register(IWorldGenerator.OVERWORLD, terrainGenerator);
-        Registries.BIOME_GENERATOR.register(IBiomeGenerator.GRASS, terrainGenerator);
+        Registries.WORLD_GENERATOR.register(WorldGenerator.OVERWORLD, new TerrainGenerator());
+        Registries.BIOME_GENERATOR.register(BiomeGenerator.GRASS, new TerrainGenerator.BiomeGen());
+
+        LOGGER.info("Registering packet types");
+        Packet.FACTORY_REGISTRY.register(NBTPacket.IDENTIFIER, new PacketFactory<>(new NBTPacket()));
+        Packet.FACTORY_REGISTRY.register(ConnectPacket.IDENTIFIER, new PacketFactory<>(new ConnectPacket()));
+        Packet.FACTORY_REGISTRY.register(ChunksPacket.IDENTIFIER, new PacketFactory<>(new ChunksPacket()));
+        Packet.FACTORY_REGISTRY.register(ChunkRequestPacket.IDENTIFIER, new PacketFactory<>(new ChunkRequestPacket()));
     }
 }

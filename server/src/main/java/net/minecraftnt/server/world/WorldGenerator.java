@@ -1,8 +1,8 @@
-package net.minecraftnt.world;
+package net.minecraftnt.server.world;
 
 import net.minecraftnt.util.Identifier;
 
-public interface IWorldGenerator {
+public abstract class WorldGenerator {
     public static final Identifier OVERWORLD = new Identifier("minecraftnt", "world.overworld");
-    Identifier getBiomeGenerator(int x, int z);
+    public abstract Identifier getBiomeGenerator(int x, int z);
 }

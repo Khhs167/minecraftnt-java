@@ -1,9 +1,10 @@
-package net.minecraftnt.world;
+package net.minecraftnt.server.world;
 
 import net.minecraftnt.rendering.ShapeGenerator;
 import net.minecraftnt.rendering.TextureAtlasLocation;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.Identifier;
+import net.minecraftnt.util.maths.MathUtils;
 
 public abstract class Block {
 
@@ -23,5 +24,12 @@ public abstract class Block {
 
     public boolean isSolid() {
         return true;
+    }
+
+    public float getShadowStrength() {
+        return 1;
+    }
+    public float affectLight(float light) {
+        return MathUtils.clamp(0, 1, light - getShadowStrength());
     }
 }

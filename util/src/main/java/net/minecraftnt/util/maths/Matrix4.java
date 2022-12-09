@@ -22,6 +22,10 @@ public class Matrix4 {
         return out;
     }
 
+    public Matrix4f getInternal() {
+        return internal;
+    }
+
     public static Matrix4 perspective(float fov, float ratio, float near, float far){
         return new Matrix4(new Matrix4f().perspective((float)Math.toRadians(fov), ratio, near, far));
     }

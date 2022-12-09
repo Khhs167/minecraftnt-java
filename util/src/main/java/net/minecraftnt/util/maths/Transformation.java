@@ -1,5 +1,9 @@
 package net.minecraftnt.util.maths;
 
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 public class Transformation {
     private Vector3 position = new Vector3();
     private Vector3 rotation = new Vector3();
@@ -71,15 +75,15 @@ public class Transformation {
         return this;
     }
 
-    public Vector3 forward(){
+    // TODO: See if there is a better way to solve this piece of shit algorithm
+    public Vector3 forward() {
         float X = (float) (Math.sin(Math.toRadians(rotation.getY())) * Math.cos(Math.toRadians(rotation.getX())));
         float Y = (float) Math.sin(Math.toRadians(-rotation.getX()));
         float Z = (float) (Math.cos(Math.toRadians(rotation.getX())) * Math.cos(Math.toRadians(rotation.getY())));
-
         return new Vector3(X, Y, Z).normalized();
     }
 
-    public Vector3 right(){
+    public Vector3 right() {
         float X = (float) (Math.sin(Math.toRadians(rotation.getY() + 90)) * Math.cos(Math.toRadians(rotation.getX())));
         float Y = (float) Math.sin(Math.toRadians(-rotation.getX()));
         float Z = (float) (Math.cos(Math.toRadians(rotation.getX())) * Math.cos(Math.toRadians(rotation.getY() + 90)));
@@ -87,7 +91,7 @@ public class Transformation {
         return new Vector3(X, Y, Z).normalized();
     }
 
-    public Vector3 up(){
+    public Vector3 up() {
         float X = (float) (Math.sin(Math.toRadians(rotation.getY())) * Math.cos(Math.toRadians(rotation.getX() + 90)));
         float Y = (float) Math.sin(Math.toRadians(-rotation.getX() + 90));
         float Z = (float) (Math.cos(Math.toRadians(rotation.getX() + 90)) * Math.cos(Math.toRadians(rotation.getY())));

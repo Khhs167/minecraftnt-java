@@ -1,6 +1,6 @@
 package net.minecraftnt.util.maths;
 
-public class Vector3 {
+public class Vector3 implements Cloneable {
     private final float x, y, z;
 
     public Vector3() {
@@ -21,6 +21,11 @@ public class Vector3 {
         this.z = z;
     }
 
+    @Override
+    public Vector3 clone(){
+        return new Vector3(x, y, z);
+    }
+
     public float getX() {
         return x;
     }
@@ -33,9 +38,6 @@ public class Vector3 {
         return z;
     }
 
-    public Vector3 clone(){
-        return new Vector3(x, y, z);
-    }
 
     public Vector3 subtract(Vector3 other){
         return add(other.negated());
@@ -67,18 +69,6 @@ public class Vector3 {
 
     public Vector3 normalized() {
         return this.divide(this.length());
-    }
-
-    public static Vector3 cross(Vector3 left, Vector3 right){
-        float X = (left.y * right.z) - (left.z * right.y);
-        float Y = (left.z * right.x) - (left.x * right.z);
-        float Z = (left.x * right.y) - (left.y * right.x);
-        return new Vector3(X, Y, Z);
-    }
-
-    public static float dot(Vector3 left, Vector3 right)
-    {
-        return (left.x * right.x) + (left.y * right.y) + (left.z * right.z);
     }
 
 }

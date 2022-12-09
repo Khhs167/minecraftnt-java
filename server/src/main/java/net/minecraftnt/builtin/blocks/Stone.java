@@ -3,7 +3,7 @@ package net.minecraftnt.builtin.blocks;
 import net.minecraftnt.rendering.TextureAtlasLocation;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.Identifier;
-import net.minecraftnt.world.Block;
+import net.minecraftnt.server.world.Block;
 
 public class Stone extends Block {
     @Override

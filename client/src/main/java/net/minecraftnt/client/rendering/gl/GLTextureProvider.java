@@ -58,7 +58,7 @@ public final class GLTextureProvider extends TextureProvider {
         try {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data.width(), data.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, data.dataBuffer());
         } catch(Exception e){
-            e.printStackTrace();
+            LOGGER.throwing(e);
         }
 
         Texture texture = new GLTexture(handle);

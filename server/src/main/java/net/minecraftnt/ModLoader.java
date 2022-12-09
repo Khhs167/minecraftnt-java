@@ -22,11 +22,11 @@ public class ModLoader {
     public static final Logger LOGGER = LogManager.getLogger("ModLoadingImplementation");
     private final LinkedList<String> mods = new LinkedList<>();
 
-    public void loadMods() {
+    public void loadMods(boolean client) {
         LOGGER.info("Loading main game mod");
         ClassLoader localClassLoader = getClass().getClassLoader();
 
-        loadMod(localClassLoader, Resources.readStream("META-INF/mod.toml"),"");
+        loadMod(localClassLoader, Resources.readStream("META-INF/mod.toml"),"", client);
 
         LOGGER.info("Searching for mods");
         //Creating a File object for directory
@@ -50,7 +50,7 @@ public class ModLoader {
 
                 JarFile jarZipFile = new JarFile(mod);
 
-                loadMod(urlClassLoader, jarZipFile.getInputStream(jarZipFile.getEntry("META-INF/mod.toml")),  mod.getName());
+                loadMod(urlClassLoader, jarZipFile.getInputStream(jarZipFile.getEntry("META-INF/mod.toml")), mod.getName(), client);
                 urlClassLoader.close();
             } catch (MalformedURLException e) {
                 LOGGER.fatal("Invalid mod path: " + e.getMessage());
@@ -62,7 +62,7 @@ public class ModLoader {
 
     }
 
-    public void loadMod(ClassLoader classLoader, InputStream tomlResource, String file) {
+    public void loadMod(ClassLoader classLoader, InputStream tomlResource, String file, boolean client) {
         LOGGER.info("Loading mod jar " + file);
         try {
 
@@ -110,7 +110,7 @@ public class ModLoader {
 
             String clientLoaderName = loaderTable.getString("ClientLoader");
 
-            if(clientLoaderName != null){
+            if(clientLoaderName != null && client){
                 LOGGER.info("Running client loader: " + clientLoaderName);
                 Class<?> clientLoader = classLoader.loadClass(clientLoaderName);
 
@@ -123,7 +123,7 @@ public class ModLoader {
             String serverLoaderName = loaderTable.getString("ServerLoader");
 
             if(serverLoaderName != null){
-                LOGGER.info("Running client loader: " + serverLoaderName);
+                LOGGER.info("Running server loader: " + serverLoaderName);
                 Class<?> serverLoader = classLoader.loadClass(serverLoaderName);
 
                 Object serverLoaderInstance = serverLoader.getDeclaredConstructor().newInstance();

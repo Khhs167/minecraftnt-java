@@ -7,33 +7,12 @@ import java.util.HashMap;
 public class Registry<T> {
 
     private final HashMap<Identifier, T> registry_data = new HashMap<>();
-    private final T default_value;
-
-    public Registry(){
-        this(null);
-    }
-
-    public Registry(T default_value){
-        this.default_value = default_value;
-    }
-
-
-    public void clear(){
-        registry_data.clear();
-    }
 
     public T get(Identifier identifier){
-        if(registry_data.containsKey(identifier))
-            return registry_data.get(identifier);
-
-        return default_value;
+        return registry_data.get(identifier);
     }
 
     public T register(Identifier identifier, T value){
-        return register(identifier, value, false);
-    }
-
-    public T register(Identifier identifier, T value, boolean override){
         if(registry_data.containsKey(identifier))
             return value;
 

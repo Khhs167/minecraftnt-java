@@ -7,13 +7,10 @@ import net.minecraftnt.rendering.Vertex;
 import net.minecraftnt.util.FaceFlags;
 import net.minecraftnt.util.maths.Vector2;
 import net.minecraftnt.util.maths.Vector3;
-import net.minecraftnt.world.Block;
+import net.minecraftnt.server.world.Block;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-
-import static net.minecraftnt.util.FaceFlags.Faces.*;
 
 public class VoxelGenerator implements ShapeGenerator {
 

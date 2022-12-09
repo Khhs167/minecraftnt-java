@@ -45,4 +45,20 @@ public class GameData {
 
         return path.toAbsolutePath().toString();
     }
+
+    public static String getWorldsDirectory() {
+        Path path = Path.of(getGameDirectory(), "worlds");
+
+        File resourceDir = path.toFile();
+
+        if(!resourceDir.exists())
+            if(!resourceDir.mkdirs())
+                throw new RuntimeException("Could not create worlds directory!");
+
+        return path.toAbsolutePath().toString();
+    }
+
+    public static String getWorldDirectory(String world) {
+        return Path.of(getWorldsDirectory(), world).toAbsolutePath().toString();
+    }
 }

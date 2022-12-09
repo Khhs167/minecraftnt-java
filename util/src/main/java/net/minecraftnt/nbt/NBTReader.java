@@ -37,7 +37,7 @@ public class NBTReader {
 
     private NBTNode parseNode(int type, boolean named) throws IOException, UnexpectedNBTNodeException {
         if(type == -1)
-            type = inputStream.read();
+            type = inputStream.readByte();
 
         String name = "";
 
