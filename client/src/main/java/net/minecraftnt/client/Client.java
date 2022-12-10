@@ -56,6 +56,9 @@ public class Client implements Runnable{
 
         BalancedThreadPool.getGlobalInstance().start();
 
+        ThreadDownloadResources threadDownloadResources = new ThreadDownloadResources();
+        threadDownloadResources.start();
+
         ModLoader modLoader = new ModLoader();
         modLoader.loadMods(true);
 
@@ -152,7 +155,7 @@ public class Client implements Runnable{
         LOGGER.info("System information:");
         LOGGER.info("JVM: {} jre-{} jvm-{}", System.getProperty("java.runtime.name"), System.getProperty("java.runtime.version"), System.getProperty("java.vm.version"));
         LOGGER.info("OS: {} {} {}", System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"));
-        LOGGER.info("Probability of success: {}%", RandomGenerator.getDefault().nextInt(30, 70));
+        LOGGER.info("Probability of success: {}%", RandomGenerator.getDefault().nextInt(50, 100));
         LOGGER.info("Available cores: {}, using {} for threading", Runtime.getRuntime().availableProcessors(), BalancedThreadPool.GLOBAL_SIZE);
 
         Server server = new Server();

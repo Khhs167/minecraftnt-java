@@ -171,6 +171,7 @@ public class World {
     public Chunk getChunk(int x, int z) {
         Chunk c = chunks.get(new ChunkPosition(x, z));
         if(c == null) {
+            generateDirect(x, z, new Chunk(new ChunkPosition(x, z)));
             c = chunks.get(new ChunkPosition(x, z));
         }
         return c;

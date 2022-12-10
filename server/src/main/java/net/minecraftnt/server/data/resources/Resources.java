@@ -55,45 +55,4 @@ public class Resources {
 
         return null;
     }
-
-
-    /**
-     * Loads a resource file as a byte buffer. Used in the sound system.
-     * @param resource The resource to load
-     * @return A byte buffer with data. Might be null.
-     */
-    public static ByteBuffer readByteBuffer(String resource) {
-        ByteBuffer buffer;
-        byte[] source = readBytes(resource);
-
-        if(source == null)
-            return null;
-
-        try (InputStream stream = new ByteArrayInputStream(source); ReadableByteChannel rbc = Channels.newChannel(stream)) {
-            buffer = ByteBuffer.allocate(source.length);
-
-            while (true) {
-                int bytes = rbc.read(buffer);
-                if (bytes == -1) {
-                    break;
-                }
-                if (buffer.remaining() == 0) {
-                    buffer = resizeBuffer(buffer, buffer.capacity() * 3 / 2); // 50%
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        buffer.flip();
-        return buffer;
-    }
-
-    private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
-        ByteBuffer newBuffer = ByteBuffer.allocate(newCapacity);
-        buffer.flip();
-        newBuffer.put(buffer);
-        return newBuffer;
-    }
 }

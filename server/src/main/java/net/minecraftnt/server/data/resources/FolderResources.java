@@ -7,9 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 public class FolderResources {
     public static byte[] loadResourceAsBytes(String name){
-        try {
-            InputStream fileStream = loadResourceAsStream(name);
-
+        try(InputStream fileStream = loadResourceAsStream(name)) {
             if(fileStream == null)
                 return null;
 

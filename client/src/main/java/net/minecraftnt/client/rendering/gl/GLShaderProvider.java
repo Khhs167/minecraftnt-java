@@ -22,8 +22,8 @@ public class GLShaderProvider extends ShaderProvider {
 
 
     private static String getShader(Identifier identifier, String file){
-        if(Resources.exists("assets/" + identifier.getNamespace() + "/shaders/" + identifier.getName() + file))
-            return Resources.readString("assets/" + identifier.getNamespace() + "/shaders/" + identifier.getName() + file);
+        if(Resources.exists("assets/" + identifier.getNamespace() + "/shaders/" + identifier.getName() + "/" + file))
+            return Resources.readString("assets/" + identifier.getNamespace() + "/shaders/" + identifier.getName() + "/" + file);
         return Resources.readString("assets/minecraftnt/shaders/default/" + file);
     }
 

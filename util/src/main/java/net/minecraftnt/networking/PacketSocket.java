@@ -80,7 +80,6 @@ public class PacketSocket {
         while(true) {
             if(currentReadLength == -1) {
                 if (dataInputStream.available() < Long.SIZE + Integer.SIZE) return;
-                while (dataInputStream.readLong() != 0xDEADBEEFL) Thread.onSpinWait();
                 currentReadLength = dataInputStream.readInt();
             }
             while (currentReadLength > 0 && dataInputStream.available() > 0) {
@@ -131,7 +130,6 @@ public class PacketSocket {
 
         ByteArrayOutputStream actualOutput = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(actualOutput);
-        dataOutputStream.writeLong(0xDEADBEEFL);
         dataOutputStream.writeInt(outputStream.size());
         dataOutputStream.write(outputStream.toByteArray());
 

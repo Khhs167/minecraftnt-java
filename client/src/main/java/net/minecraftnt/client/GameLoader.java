@@ -22,7 +22,6 @@ public class GameLoader extends ModLoadingImplementation {
 
         LOGGER.info("Loading textures");
         Renderer.textureProviderC().load(new Identifier("minecraftnt", "vroom"));
-        Renderer.textureProviderC().load(new Identifier("minecraftnt", "4x4"));
         Renderer.textureProviderC().load(new Identifier("minecraftnt", "terrain"));
         TextureAtlasLocation.loadLocations("atlasmap");
 

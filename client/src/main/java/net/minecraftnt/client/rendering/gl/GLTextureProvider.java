@@ -29,8 +29,6 @@ public final class GLTextureProvider extends TextureProvider {
             decoder.decodeFlipped(buffer, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
             buffer.flip();
 
-
-
             return new TextureData(buffer, decoder.getWidth(), decoder.getHeight());
 
         } catch (Throwable e) {

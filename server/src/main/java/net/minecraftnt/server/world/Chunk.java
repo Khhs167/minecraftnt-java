@@ -19,10 +19,10 @@ public class Chunk {
     public static final int CHUNK_WIDTH = 16;
     public static final int CHUNK_HEIGHT = 256;
 
-    private short[][][] map = new short[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
-    private float[][][] illuminationMap = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
-    private HashMap<Short, Identifier> blockMap = new HashMap<>();
-    private HashMap<Identifier, Short> idMap = new HashMap<>();
+    private final short[][][] map = new short[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+    private final float[][][] illuminationMap = new float[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+    private final HashMap<Short, Identifier> blockMap = new HashMap<>();
+    private final HashMap<Identifier, Short> idMap = new HashMap<>();
     public Mesh mesh;
     public Transformation transformation;
     public boolean dirty = false;

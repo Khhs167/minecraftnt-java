@@ -52,8 +52,6 @@ public class ChunksPacket extends Packet {
 
     @Override
     public void load(DataInputStream stream) throws IOException {
-        while(stream.readLong() != 0xC0FFEE) ;
-
         map = new short[Chunk.CHUNK_WIDTH][Chunk.CHUNK_HEIGHT][Chunk.CHUNK_WIDTH];
         for(int x = 0; x < Chunk.CHUNK_WIDTH; x++){
             for(int z = 0; z < Chunk.CHUNK_WIDTH; z++){
@@ -104,7 +102,6 @@ public class ChunksPacket extends Packet {
 
     @Override
     public void write(DataOutputStream stream) throws IOException {
-        stream.writeLong(0xC0FFEE);
         for(int x = 0; x < Chunk.CHUNK_WIDTH; x++){
             for(int z = 0; z < Chunk.CHUNK_WIDTH; z++){
                 for (int y = 0; y < Chunk.CHUNK_HEIGHT; y++){
