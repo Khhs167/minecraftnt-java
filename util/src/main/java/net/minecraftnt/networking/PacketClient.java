@@ -40,7 +40,7 @@ public class PacketClient {
      * @param packet The packet to send
      * @throws IOException Sometimes connecting errors happen
      */
-    public void send(Packet packet) throws IOException {
+    public void send(Packet packet) {
         packetSocket.send(packet);
     }
 

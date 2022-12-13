@@ -12,7 +12,6 @@ uniform float time;
 uniform float delta;
 
 out struct VertexData {
-    vec3 position;
     vec2 uv;
     float lighting;
 } Vertex;
@@ -21,7 +20,6 @@ void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0);
 
-    Vertex.position = (model * vec4(position - vec3(0.5), 1.0)).rgb;
     Vertex.uv = uv;
     Vertex.lighting = lighting;
 }

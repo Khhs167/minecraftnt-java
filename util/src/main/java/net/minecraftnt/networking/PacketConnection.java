@@ -29,7 +29,11 @@ class PacketConnection {
         return packetSocket.get();
     }
 
-    public void read() throws IOException {
+    public void ping() throws IOException {
         packetSocket.ping();
+    }
+
+    public void disconnect() throws IOException {
+        packetSocket.socket().close();
     }
 }

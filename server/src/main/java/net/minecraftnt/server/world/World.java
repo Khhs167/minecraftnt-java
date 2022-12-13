@@ -176,4 +176,8 @@ public class World {
         }
         return c;
     }
+
+    public boolean hasChunk(ChunkPosition position) {
+        return chunks.containsKey(position);
+    }
 }

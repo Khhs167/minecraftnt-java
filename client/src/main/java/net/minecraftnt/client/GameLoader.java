@@ -1,7 +1,7 @@
 package net.minecraftnt.client;
 
 import net.minecraftnt.Registries;
-import net.minecraftnt.api.ModLoadingImplementation;
+import net.minecraftnt.api.ClientLoader;
 import net.minecraftnt.client.rendering.gl.GLRenderer;
 import net.minecraftnt.rendering.*;
 import net.minecraftnt.client.builtin.VoxelGenerator;
@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class GameLoader extends ModLoadingImplementation {
+public class GameLoader implements ClientLoader {
     public static final Logger LOGGER = LogManager.getLogger(GameLoader.class);
     @Override
     public void loadClient() {

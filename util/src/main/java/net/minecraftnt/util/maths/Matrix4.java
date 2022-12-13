@@ -43,10 +43,7 @@ public class Matrix4 {
 
     public static Matrix4 rotate(Matrix4 t, Vector3 rotation){
         Matrix4f n = new Matrix4f(t.internal);
-
-        rotation = rotation.multiply((float)Math.toRadians(1)); // Scale the rotation to radians
-
-        n.rotateXYZ(rotation.getX(), rotation.getY(), rotation.getZ());
+        n.rotateX((float)Math.toRadians(rotation.getX())).rotateY((float)Math.toRadians(rotation.getY())).rotateZ((float)Math.toRadians(rotation.getZ()));
         return new Matrix4(n);
     }
 

@@ -1,5 +1,7 @@
 package net.minecraftnt;
 
+import net.minecraftnt.entities.Entity;
+import net.minecraftnt.entities.Pawn;
 import net.minecraftnt.rendering.*;
 import net.minecraftnt.util.Registry;
 import net.minecraftnt.server.world.Block;
@@ -15,4 +17,6 @@ public class Registries {
     public static final Registry<RenderAPI> RENDER_API = new Registry<>();
     public static final Registry<BiomeGenerator> BIOME_GENERATOR = new Registry<>();
     public static final Registry<WorldGenerator> WORLD_GENERATOR = new Registry<>();
+    public static final Registry<Entity> ENTITIES = new Registry<>();
+    public static final Registry<Pawn> PAWNS = new Registry<>();
 }

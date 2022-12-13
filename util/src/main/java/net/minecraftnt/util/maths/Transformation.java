@@ -4,7 +4,10 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public class Transformation {
+import java.io.Serializable;
+
+
+public class Transformation implements Serializable {
     private Vector3 position = new Vector3();
     private Vector3 rotation = new Vector3();
     private Vector3 scale = new Vector3(1);

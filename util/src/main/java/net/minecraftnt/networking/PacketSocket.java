@@ -25,11 +25,15 @@ public class PacketSocket {
     private final Queue<Packet> packets = new LinkedList<>();
     private final Queue<Packet> writeQueue = new LinkedList<>();
     private final Lock writeLock = new ReentrantLock();
+    private final Lock readLock = new ReentrantLock();
+    private final long PACKET_HEADER = 0xDEADBEEFL;
     public PacketSocket(SocketChannel channel) {
         this.channel = channel;
     }
 
     private void readPacket() throws IOException {
+        if(currentReadBuffer.isEmpty()) return;
+
         byte[] data = new byte[currentReadBuffer.size()];
         for(int i = 0; i < data.length; i++) data[i] = currentReadBuffer.get(i);
         DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(data));
@@ -38,18 +42,23 @@ public class PacketSocket {
         String name = GenericUtil.readString(dataStream);
 
         Identifier identifier = new Identifier(namespace, name);
+
         PacketFactory<?> packetFactory = Packet.FACTORY_REGISTRY.get(identifier);
 
         if (packetFactory == null) {
-            //LOGGER.warn("Could not read package from id '{}'", identifier);
+            LOGGER.warn("Could not read package from id '{}'", identifier);
+            currentReadLength = -1;
+            currentReadBuffer.clear();
             return;
         }
 
         try {
             Packet packet = packetFactory.instance();
             packet.load(dataStream);
+            readLock.lock();
             packets.add(packet);
-        } catch (Exception e) {
+            readLock.unlock();
+        } catch (IOException e) {
             LOGGER.throwing(e);
         }
 
@@ -64,13 +73,12 @@ public class PacketSocket {
      * @throws IOException Sometimes something goes wrong with reading
      */
     public void ping() throws IOException {
-        if(!channel.isConnected())
+        if(!channel.isConnected() || !channel.isOpen())
             return;
 
         writeLock.lock();
-        Packet p;
-        while ((p = writeQueue.poll()) != null)
-            write(p);
+        while (!writeQueue.isEmpty())
+            write(writeQueue.poll());
         writeLock.unlock();
 
         ByteBuffer readData = ByteBuffer.allocate(channel.socket().getInputStream().available());
@@ -79,16 +87,34 @@ public class PacketSocket {
 
         while(true) {
             if(currentReadLength == -1) {
-                if (dataInputStream.available() < Long.SIZE + Integer.SIZE) return;
-                currentReadLength = dataInputStream.readInt();
+                if (dataInputStream.available() < Long.BYTES) return;
+                while(dataInputStream.available() >= Long.BYTES) {
+                    if(dataInputStream.readLong() == PACKET_HEADER) {
+                        currentReadLength = -2;
+                        break;
+                    }
+                    currentReadLength = -1;
+                    Thread.onSpinWait();
+                }
             }
+
+            if(currentReadLength == -2) {
+                if(dataInputStream.available() >= Integer.BYTES)
+                    currentReadLength = dataInputStream.readInt();
+            }
+
             while (currentReadLength > 0 && dataInputStream.available() > 0) {
                 currentReadBuffer.add(dataInputStream.readByte());
                 currentReadLength--;
             }
 
-            if(currentReadLength == 0)
-                readPacket();
+            if(currentReadLength == 0) {
+                try {
+                    readPacket();
+                } catch(Exception e) {
+                    LOGGER.throwing(e);
+                }
+            }
 
             if(currentReadLength != -1)
                 return;
@@ -100,7 +126,12 @@ public class PacketSocket {
      * @return The latest packet
      */
     public Packet get() {
-        return packets.poll();
+        readLock.lock();
+        Packet packet = null;
+        if(!packets.isEmpty())
+            packet = packets.poll();
+        readLock.unlock();
+        return packet;
     }
 
     /**
@@ -115,11 +146,10 @@ public class PacketSocket {
 
 
     private void write(Packet packet) throws IOException {
-        if(!channel.isConnected())
+        if(!channel.isConnected() || !channel.isOpen())
             return;
 
         Identifier identifier = packet.getTypeIdentifier();
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
         out.writeBytes(identifier.getNamespace());
@@ -130,11 +160,16 @@ public class PacketSocket {
 
         ByteArrayOutputStream actualOutput = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(actualOutput);
+        dataOutputStream.writeLong(PACKET_HEADER);
         dataOutputStream.writeInt(outputStream.size());
         dataOutputStream.write(outputStream.toByteArray());
 
         channel.write(ByteBuffer.wrap(actualOutput.toByteArray()));
         out.flush();
+    }
+
+    public SocketChannel socket() {
+        return channel;
     }
 
 }

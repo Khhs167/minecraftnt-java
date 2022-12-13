@@ -1,23 +1,28 @@
 package net.minecraftnt.client;
 
+import net.minecraftnt.InputCommand;
 import net.minecraftnt.ModLoader;
+import net.minecraftnt.builtin.entities.CameraFlightPawn;
+import net.minecraftnt.entities.Pawn;
 import net.minecraftnt.nbt.NBTReader;
 import net.minecraftnt.nbt.NBTWriter;
 import net.minecraftnt.nbt.nodes.NBTCompoundNode;
 import net.minecraftnt.networking.*;
+import net.minecraftnt.rendering.Mesh;
 import net.minecraftnt.rendering.Renderer;
 import net.minecraftnt.rendering.Shader;
+import net.minecraftnt.rendering.Vertex;
 import net.minecraftnt.server.Server;
 import net.minecraftnt.server.data.resources.Resources;
-import net.minecraftnt.server.packets.ChunkRequestPacket;
-import net.minecraftnt.server.packets.ChunksPacket;
-import net.minecraftnt.server.packets.ConnectPacket;
+import net.minecraftnt.server.packets.*;
 import net.minecraftnt.server.world.Chunk;
+import net.minecraftnt.server.world.ChunkPosition;
 import net.minecraftnt.threading.BalancedThreadPool;
 import net.minecraftnt.threading.WeightedRunnable;
 import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.maths.Matrix4;
 import net.minecraftnt.util.maths.Transformation;
+import net.minecraftnt.util.maths.Vector2;
 import net.minecraftnt.util.maths.Vector3;
 import net.minecraftnt.client.platform.Window;
 import net.minecraftnt.server.world.WorldGenerator;
@@ -26,6 +31,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.random.RandomGenerator;
 
 public class Client implements Runnable{
@@ -36,24 +43,37 @@ public class Client implements Runnable{
     }
 
     private World world;
-    private int render_distance = 2;
+    private int render_distance = 1;
+    private Transformation cameraTransform = new Transformation();
+    private ChunkPosition previousCameraChunk = new ChunkPosition(0, 0);
+    private Pawn currentPawn = new CameraFlightPawn();
+    private Queue<InputCommand> inputCommands = new LinkedList<>();
+    private float positionLagTimer = 0;
 
     public void handlePacket(Packet packet) {
+        //LOGGER.info(packet.getTypeIdentifier());
         if(packet.getTypeIdentifier() == ChunksPacket.IDENTIFIER) {
             ChunksPacket chunksPacket = (ChunksPacket)packet;
             Chunk chunk = chunksPacket.getChunk();
-            LOGGER.info("Received chunk at " + chunk.getPosition());
             world.setChunk(chunk);
             return;
         }
+
+        if(packet.getTypeIdentifier() == CameraTransformPacket.IDENTIFIER) {
+            Transformation newTransform = ((CameraTransformPacket)packet).transformation;
+            if(newTransform.getPosition().subtract(cameraTransform.getPosition()).lengthSquared() > 100f && positionLagTimer > 10f) {
+                //cameraTransform.setPosition(newTransform.getPosition());
+                positionLagTimer = 0f;
+            }
+
+            return;
+        }
+
         LOGGER.error("Unhandled packet " + packet.getTypeIdentifier());
     }
 
     @Override
     public void run() {
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-
-
         BalancedThreadPool.getGlobalInstance().start();
 
         ThreadDownloadResources threadDownloadResources = new ThreadDownloadResources();
@@ -75,29 +95,34 @@ public class Client implements Runnable{
             throw new RuntimeException(e);
         }
 
+        Transformation transformation = new Transformation();
+
         //Renderer.create(RenderAPI.OPENGL);
 
         world = new World();
-
-        Transformation cameraTransform = new Transformation();
 
         cameraTransform.setPosition(new Vector3(5,  50, -15));
         //cameraTransform.setRotationX(45);
 
         for(int x = -render_distance; x <= render_distance; x++) {
             for(int z = -render_distance; z <= render_distance; z++) {
-                try {
-                    LOGGER.info("Requesting chunk {}, {}", x, z);
-                    client.send(new ChunkRequestPacket(x, z));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                client.send(new ChunkRequestPacket(x, z));
             }
         }
 
         while (window.stepFrame()) {
 
             if (window.getInputDevice().isDown(25))
+                inputCommands.add(new InputCommand("forward"));
+            if (window.getInputDevice().isDown(39))
+                inputCommands.add(new InputCommand("backward"));
+
+            if (window.getInputDevice().isDown(40))
+                inputCommands.add(new InputCommand("right"));
+            if (window.getInputDevice().isDown(38))
+                inputCommands.add(new InputCommand("left"));
+
+            /*if (window.getInputDevice().isDown(25))
                 cameraTransform.move(cameraTransform.forward().multiply(window.getFrameTime() * 10));
             if (window.getInputDevice().isDown(39))
                 cameraTransform.move(cameraTransform.forward().negated().multiply(window.getFrameTime() * 10));
@@ -118,7 +143,26 @@ public class Client implements Runnable{
             if (window.getInputDevice().isDown(116))
                 cameraTransform.rotate(new Vector3(window.getFrameTime() * 50, 0, 0));
             if (window.getInputDevice().isDown(111))
-                cameraTransform.rotate(new Vector3(-window.getFrameTime() * 50, 0, 0));
+                cameraTransform.rotate(new Vector3(-window.getFrameTime() * 50, 0, 0));*/
+
+
+            while (!inputCommands.isEmpty()) {
+                InputCommand c = inputCommands.poll();
+                currentPawn.registerInput(c);
+                client.send(new InputPacket(c));
+            }
+
+            cameraTransform = currentPawn.transform(cameraTransform, window.getFrameTime());
+
+            ChunkPosition cameraChunkPos = new ChunkPosition((int) Math.floor(cameraTransform.getPosition().getX() / Chunk.CHUNK_WIDTH), (int) Math.floor(cameraTransform.getPosition().getZ() / Chunk.CHUNK_WIDTH));
+
+            if (!cameraChunkPos.equals(previousCameraChunk)) {
+                previousCameraChunk = cameraChunkPos;
+
+                if (!world.hasChunk(cameraChunkPos)) {
+                    client.send(new ChunkRequestPacket(cameraChunkPos.getX(), cameraChunkPos.getY()));
+                }
+            }
 
             Renderer.shaderProviderC().bind(Shader.DEFAULT);
 
@@ -136,12 +180,15 @@ public class Client implements Runnable{
 
             try {
                 client.ping();
-                Packet c;
-                while ((c = client.get()) != null)
-                    handlePacket(c);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 LOGGER.error("Packet Error: " + e);
             }
+
+            Packet c;
+            while ((c = client.get()) != null)
+                handlePacket(c);
+
+            positionLagTimer += window.getFrameTime();
         }
 
         BalancedThreadPool.getGlobalInstance().kill();

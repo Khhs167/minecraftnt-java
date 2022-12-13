@@ -5,7 +5,6 @@ uniform sampler2D texture;
 out vec4 FragColor;
 
 in struct VertexData {
-    vec3 position;
     vec2 uv;
     float lighting;
 } Vertex;

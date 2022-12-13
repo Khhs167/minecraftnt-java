@@ -1,6 +1,9 @@
 package net.minecraftnt;
 
 import com.moandjiezana.toml.Toml;
+import net.minecraftnt.api.ClientLoader;
+import net.minecraftnt.api.ServerLoader;
+import net.minecraftnt.api.SharedLoader;
 import net.minecraftnt.server.data.GameData;
 import net.minecraftnt.server.data.resources.Resources;
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +22,7 @@ import java.util.zip.ZipFile;
 
 public class ModLoader {
 
-    public static final Logger LOGGER = LogManager.getLogger("ModLoadingImplementation");
+    public static final Logger LOGGER = LogManager.getLogger("ModLoader");
     private final LinkedList<String> mods = new LinkedList<>();
 
     public void loadMods(boolean client) {
@@ -102,11 +105,8 @@ public class ModLoader {
             LOGGER.info("Running shared loader: " + sharedLoaderName);
 
             Class<?> sharedLoader = classLoader.loadClass(sharedLoaderName);
-
-            Object sharedLoaderInstance = sharedLoader.getDeclaredConstructor().newInstance();
-
-            Method sharedLoaderMethod = sharedLoader.getMethod("loadShared");
-            sharedLoaderMethod.invoke(sharedLoaderInstance);
+            SharedLoader sharedLoaderInstance = (SharedLoader)sharedLoader.getDeclaredConstructor().newInstance();
+            sharedLoaderInstance.loadShared();
 
             String clientLoaderName = loaderTable.getString("ClientLoader");
 
@@ -114,10 +114,8 @@ public class ModLoader {
                 LOGGER.info("Running client loader: " + clientLoaderName);
                 Class<?> clientLoader = classLoader.loadClass(clientLoaderName);
 
-                Object clientLoaderInstance = clientLoader.getDeclaredConstructor().newInstance();
-
-                Method clientLoaderMethod = clientLoader.getMethod("loadClient");
-                clientLoaderMethod.invoke(clientLoaderInstance);
+                ClientLoader clientLoaderInstance = (ClientLoader)clientLoader.getDeclaredConstructor().newInstance();
+                clientLoaderInstance.loadClient();
             }
 
             String serverLoaderName = loaderTable.getString("ServerLoader");
@@ -126,10 +124,8 @@ public class ModLoader {
                 LOGGER.info("Running server loader: " + serverLoaderName);
                 Class<?> serverLoader = classLoader.loadClass(serverLoaderName);
 
-                Object serverLoaderInstance = serverLoader.getDeclaredConstructor().newInstance();
-
-                Method serverLoaderMethod = serverLoader.getMethod("loadServer");
-                serverLoaderMethod.invoke(serverLoaderInstance);
+                ServerLoader serverLoaderInstance = (ServerLoader)serverLoader.getDeclaredConstructor().newInstance();
+                serverLoaderInstance.loadServer();
             }
 
             mods.add(name);

@@ -84,6 +84,8 @@ public class PacketListener {
      * @return The latest packet
      */
     public Packet get() {
+        if(packets.isEmpty())
+            return null;
         return packets.poll();
     }
 
@@ -100,7 +102,7 @@ public class PacketListener {
     }
 
     /**
-     * Accept incoming connections and read available packets
+     * Accept incoming connections and read available packets as well as write needed packets
      */
     public void ping() {
         try {
@@ -111,7 +113,7 @@ public class PacketListener {
 
                 for (int i = 0; i < connections.size(); i++) {
                     PacketConnection connection = connections.get(i);
-                    connection.read();
+                    connection.ping();
                     Packet p;
                     while((p = connection.get()) != null) {
                         p.setSender(i);
@@ -120,6 +122,15 @@ public class PacketListener {
                 }
             }
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void disconnect(int sender) {
+        PacketConnection connection = connections.get(sender);
+        try {
+            connection.disconnect();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -18,8 +18,15 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+        try {
+            runServer();
+            LOGGER.info("Server closed gracefully");
+        } catch (Exception e) {
+            LOGGER.error("Server closed with error: ", e);
+        }
+    }
 
+    private void runServer() {
         LOGGER.info("Starting server");
         PacketListener listener = new PacketListener(25569);
 

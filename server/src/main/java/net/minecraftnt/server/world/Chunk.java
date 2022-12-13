@@ -74,7 +74,10 @@ public class Chunk {
     }
 
     public boolean getSolid(int x, int y, int z) {
-        return getBlock(x, y, z).isSolid();
+        Block block = getBlock(x, y, z);
+        if(block == null)
+            return false;
+        return block.isSolid();
     }
 
     public void setBlock(int x, int y, int z, Identifier identifier) {

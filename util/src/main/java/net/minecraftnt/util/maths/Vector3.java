@@ -1,6 +1,8 @@
 package net.minecraftnt.util.maths;
 
-public class Vector3 implements Cloneable {
+import java.io.Serializable;
+
+public class Vector3 implements Cloneable, Serializable {
     private final float x, y, z;
 
     public Vector3() {
@@ -37,6 +39,10 @@ public class Vector3 implements Cloneable {
     public float getZ() {
         return z;
     }
+
+    public Vector3 setX(float v) { return new Vector3(v, y, z); }
+    public Vector3 setY(float v) { return new Vector3(x, v, z); }
+    public Vector3 setZ(float v) { return new Vector3(x, y, v); }
 
 
     public Vector3 subtract(Vector3 other){
