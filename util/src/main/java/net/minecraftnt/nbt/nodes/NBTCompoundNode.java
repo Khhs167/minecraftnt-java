@@ -16,59 +16,65 @@ public class NBTCompoundNode extends NBTListNode<NBTNode> {
     public short getShort(String name) {
         NBTNode child = getChild(name);
         if(Objects.equals(child.getType(), "short")){
-            NBTValueNode<Short> valueNode = (NBTValueNode<Short>) child;
-
-            return valueNode.getValue();
+            NBTValueNode<?> node = (NBTValueNode<?>) child;
+            Object obj = node.getValue();
+            if(obj instanceof Short value)
+                return value;
         }
         return 0;
     }
 
     public int getInt(String name) {
         NBTNode child = getChild(name);
-        if(Objects.equals(child.getType(), "short")){
-            NBTValueNode<Integer> valueNode = (NBTValueNode<Integer>) child;
-
-            return valueNode.getValue();
+        if(Objects.equals(child.getType(), "int")){
+            NBTValueNode<?> node = (NBTValueNode<?>) child;
+            Object obj = node.getValue();
+            if(obj instanceof Integer value)
+                return value;
         }
         return 0;
     }
 
     public String getString(String name) {
         NBTNode child = getChild(name);
-        if(Objects.equals(child.getType(), "short")){
-            NBTValueNode<String> valueNode = (NBTValueNode<String>) child;
-
-            return valueNode.getValue();
+        if(Objects.equals(child.getType(), "string")){
+            NBTValueNode<?> node = (NBTValueNode<?>) child;
+            Object obj = node.getValue();
+            if(obj instanceof String value)
+                return value;
         }
         return "";
     }
 
     public long getLong(String name) {
         NBTNode child = getChild(name);
-        if(Objects.equals(child.getType(), "short")){
-            NBTValueNode<Long> valueNode = (NBTValueNode<Long>) child;
-
-            return valueNode.getValue();
+        if(Objects.equals(child.getType(), "long")){
+            NBTValueNode<?> node = (NBTValueNode<?>) child;
+            Object obj = node.getValue();
+            if(obj instanceof Long value)
+                return value;
         }
         return 0;
     }
 
     public float getFloat(String name) {
         NBTNode child = getChild(name);
-        if(Objects.equals(child.getType(), "short")){
-            NBTValueNode<Float> valueNode = (NBTValueNode<Float>) child;
-
-            return valueNode.getValue();
+        if(Objects.equals(child.getType(), "float")){
+            NBTValueNode<?> node = (NBTValueNode<?>) child;
+            Object obj = node.getValue();
+            if(obj instanceof Float value)
+                return value;
         }
         return 0;
     }
 
     public double getDouble(String name) {
         NBTNode child = getChild(name);
-        if(Objects.equals(child.getType(), "short")){
-            NBTValueNode<Double> valueNode = (NBTValueNode<Double>) child;
-
-            return valueNode.getValue();
+        if(Objects.equals(child.getType(), "double")){
+            NBTValueNode<?> node = (NBTValueNode<?>) child;
+            Object obj = node.getValue();
+            if(obj instanceof Double value)
+                return value;
         }
         return 0;
     }

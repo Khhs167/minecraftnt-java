@@ -64,4 +64,12 @@ public abstract class Packet {
      * @throws IOException In case something fails with the stream
      */
     public abstract void write(DataOutputStream stream) throws IOException;
+
+    /**
+     * Get the smallest size the packet may have
+     * @return The size to preallocate
+     */
+    public int minimalSize() {
+        return 0;
+    }
 }

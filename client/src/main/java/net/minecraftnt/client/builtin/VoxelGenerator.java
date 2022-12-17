@@ -34,6 +34,15 @@ public class VoxelGenerator implements ShapeGenerator {
 
     };
 
+    private final static float[] lighting = new float[] {
+            1.0f,
+            0.7f,
+            0.4f,
+            0.65f,
+            0.9f,
+            0.3f
+    };
+
     public Collection<Vertex> generateShape(FaceFlags faces, Vector3 position, Block block) {
 
         LinkedList<Vertex> vertices = new LinkedList<>();
@@ -58,13 +67,13 @@ public class VoxelGenerator implements ShapeGenerator {
                 final Vector3 pos10 = pos.add(right);
                 final Vector3 pos11 = pos.add(up).add(right);
 
-                vertices.add(new Vertex(pos00, uv00, 1));
-                vertices.add(new Vertex(pos01, uv01, 1));
-                vertices.add(new Vertex(pos10, uv10, 1));
+                vertices.add(new Vertex(pos00, uv00, lighting[i]));
+                vertices.add(new Vertex(pos01, uv01, lighting[i]));
+                vertices.add(new Vertex(pos10, uv10, lighting[i]));
 
-                vertices.add(new Vertex(pos01, uv01, 1));
-                vertices.add(new Vertex(pos11, uv11, 1));
-                vertices.add(new Vertex(pos10, uv10, 1));
+                vertices.add(new Vertex(pos01, uv01, lighting[i]));
+                vertices.add(new Vertex(pos11, uv11, lighting[i]));
+                vertices.add(new Vertex(pos10, uv10, lighting[i]));
 
             }
 

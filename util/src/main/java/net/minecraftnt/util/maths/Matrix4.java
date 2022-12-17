@@ -13,12 +13,7 @@ public class Matrix4 {
 
     public float[] getData(){
         float[] out = new float[16];
-        for(int i = 0; i < 4; i++){
-            out[i * 4] =     internal.get(i, 0);
-            out[i * 4 + 1] = internal.get(i, 1);
-            out[i * 4 + 2] = internal.get(i, 2);
-            out[i * 4 + 3] = internal.get(i, 3);
-        }
+        out = internal.get(out);
         return out;
     }
 
@@ -51,6 +46,17 @@ public class Matrix4 {
         Matrix4f n = new Matrix4f(t.internal);
         n.scale(scale.getX(), scale.getY(), scale.getZ());
         return new Matrix4(n);
+    }
+
+    public static Matrix4 transformation(Transformation transformation){
+        Vector3 location = transformation.getPosition();
+        Vector3 rotation = transformation.getRotation();
+        Vector3 scale = transformation.getScale();
+        Matrix4f worldMatrix = new Matrix4f().identity().translate(location.getX(), -location.getY(), location.getZ()).
+                rotateX((float)Math.toRadians(rotation.getX())).
+                rotateY((float)Math.toRadians(rotation.getY())).
+                rotateZ((float)Math.toRadians(rotation.getZ())).scale(scale.getX(), scale.getY(), scale.getZ());
+        return new Matrix4(worldMatrix);
     }
 
     public static Matrix4 identity(){

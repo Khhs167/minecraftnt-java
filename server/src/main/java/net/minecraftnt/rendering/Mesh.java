@@ -7,6 +7,11 @@ public abstract class Mesh {
     protected Vertex[] vertices = new Vertex[0];
     protected float[] vertex_data = new float[0];
     protected final int size = 6;
+    protected boolean dirty;
+
+    public void dirty() {
+        dirty = true;
+    }
 
     public void setVertices(Vertex[] vertices) {
         this.vertices = vertices;
@@ -24,6 +29,8 @@ public abstract class Mesh {
 
             vertex_data[i * size + 5] = vertices[i].lighting();
         }
+
+        dirty();
 
     }
 

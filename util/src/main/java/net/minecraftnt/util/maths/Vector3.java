@@ -23,6 +23,13 @@ public class Vector3 implements Cloneable, Serializable {
         this.z = z;
     }
 
+    public static final Vector3 UP = new Vector3(0, 1, 0);
+    public static final Vector3 FORWARD = new Vector3(0, 0, 1);
+    public static final Vector3 RIGHT = new Vector3(-1, 0, 0);
+    public static final Vector3 DOWN = new Vector3(0, -1, 0);
+    public static final Vector3 BACK = new Vector3(0, 0, -1);
+    public static final Vector3 LEFT = new Vector3(1, 0, 0);
+
     @Override
     public Vector3 clone(){
         return new Vector3(x, y, z);
@@ -75,6 +82,18 @@ public class Vector3 implements Cloneable, Serializable {
 
     public Vector3 normalized() {
         return this.divide(this.length());
+    }
+
+    public Vector3 addX(float v) {
+        return new Vector3(x + v, y, z);
+    }
+
+    public Vector3 addY(float v) {
+        return new Vector3(x, y + v, z);
+    }
+
+    public Vector3 addZ(float v) {
+        return new Vector3(x, y + v, z);
     }
 
 }

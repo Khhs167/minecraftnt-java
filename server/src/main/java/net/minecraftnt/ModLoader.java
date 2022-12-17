@@ -24,6 +24,16 @@ public class ModLoader {
 
     public static final Logger LOGGER = LogManager.getLogger("ModLoader");
     private final LinkedList<String> mods = new LinkedList<>();
+    private final LinkedList<ClientLoader> resourceLoaders = new LinkedList<>();
+    private static ModLoader latest;
+
+    public static ModLoader getLatest() {
+        return latest;
+    }
+
+    public ModLoader() {
+        latest = this;
+    }
 
     public void loadMods(boolean client) {
         LOGGER.info("Loading main game mod");
@@ -61,6 +71,8 @@ public class ModLoader {
                 LOGGER.fatal("URLClassLoader error: " + e.getMessage());
             }
         }
+
+        reloadResources();
 
 
     }
@@ -116,6 +128,8 @@ public class ModLoader {
 
                 ClientLoader clientLoaderInstance = (ClientLoader)clientLoader.getDeclaredConstructor().newInstance();
                 clientLoaderInstance.loadClient();
+
+                resourceLoaders.add(clientLoaderInstance);
             }
 
             String serverLoaderName = loaderTable.getString("ServerLoader");
@@ -142,5 +156,10 @@ public class ModLoader {
         } catch (AssertionError e) {
             LOGGER.fatal("Mod loading assertion error: {}", e.getMessage());
         }
+    }
+
+    public void reloadResources() {
+        for(ClientLoader loader : resourceLoaders)
+            loader.loadResources();
     }
 }

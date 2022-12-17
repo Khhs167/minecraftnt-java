@@ -72,4 +72,7 @@ public class PacketClient {
         packetSocket.ping();
     }
 
+    public boolean connected() {
+        return packetSocket.connected();
+    }
 }

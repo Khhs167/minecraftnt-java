@@ -7,11 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ClassResources {
-
+public class ClassResources implements ResourceProvider {
     private static final Logger LOGGER = LogManager.getLogger(ClassResources.class);
-
-    public static InputStream loadResourceAsStream(String fileName) {
+    public InputStream loadResourceAsStream(String fileName) {
 
         // The class loader that loaded the class
         ClassLoader classLoader = ClassResources.class.getClassLoader();
@@ -26,8 +24,7 @@ public class ClassResources {
         }
 
     }
-
-    public static boolean fileExists(String fileName) {
+    public boolean fileExists(String fileName) {
 
         // The class loader that loaded the class
         ClassLoader classLoader = ClassResources.class.getClassLoader();
@@ -38,33 +35,5 @@ public class ClassResources {
             return false;
 
         return true;
-
-    }
-
-    public static byte[] loadResourceAsBytes(String path){
-        InputStream stream = loadResourceAsStream(path);
-
-        if(stream == null)
-            return null;
-
-        byte[] bytes = new byte[0];
-
-        try{
-            bytes = stream.readAllBytes();
-        } catch (IOException e) {
-            LOGGER.throwing(e);
-        }
-
-        return bytes;
-    }
-
-    public static String loadResourceAsString(String path){
-
-        byte[] bytes = loadResourceAsBytes(path);
-
-        if(bytes == null)
-            return null;
-
-        return new String(bytes, StandardCharsets.UTF_8);
     }
 }

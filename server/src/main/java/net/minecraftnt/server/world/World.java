@@ -5,6 +5,7 @@ import net.minecraftnt.Registries;
 import net.minecraftnt.saving.WorldIO;
 import net.minecraftnt.rendering.Renderer;
 import net.minecraftnt.threading.BalancedThreadPool;
+import net.minecraftnt.threading.ThreadedExecutor;
 import net.minecraftnt.util.Identifier;
 import net.minecraftnt.util.maths.Vector3;
 import org.apache.logging.log4j.LogManager;
@@ -15,14 +16,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class World {
+
+    public static final ThreadedExecutor THREADED_EXECUTOR = new ThreadedExecutor("WorldThread");
+
     public static final Logger LOGGER = LogManager.getLogger(World.class);
     private WorldGenerator worldGenerator;
     private final HashMap<ChunkPosition, Chunk> chunks = new HashMap<>();
     private static final int CHUNK_PREGEN_RADIUS = 8;
     private final Lock lock = new ReentrantLock();
 
-    //private static final ThreadedExecutor EXECUTOR = new ThreadedExecutor("WorldChunkThread");
-    private static final BalancedThreadPool EXECUTOR = BalancedThreadPool.getGlobalInstance();
+    private static final ThreadedExecutor EXECUTOR = World.THREADED_EXECUTOR;
 
     private final WorldIO worldIO;
 
@@ -58,11 +61,11 @@ public class World {
     }
 
     public void setChunk(Chunk chunk) {
+        lock.lock();
         chunks.put(chunk.getPosition(), chunk);
         chunk.world = this;
         chunk.transformation.setPosition(new Vector3(chunk.getPosition().getX() * Chunk.CHUNK_WIDTH, 0,chunk.getPosition().getY() * Chunk.CHUNK_WIDTH));
-        chunk.mesh = Renderer.createMeshC();
-        rebuildNeighbours(chunk.getPosition().getX(), chunk.getPosition().getY());
+        lock.unlock();
     }
 
 
@@ -129,7 +132,6 @@ public class World {
         EXECUTOR.enqueue(() -> {
             chunk.mesh.lock.lock();
             chunk.generateMesh();
-            chunk.dirty = true;
             chunk.mesh.lock.unlock();
         }, 10);
     }
@@ -147,15 +149,9 @@ public class World {
         for (Chunk chunk : chunks.values()) {
             if (chunk.mesh == null) {
                 chunk.mesh = Renderer.createMeshC();
-                BalancedThreadPool.getGlobalInstance().enqueue(() -> {
+                THREADED_EXECUTOR.enqueue(() -> {
                     rebuild(chunk.getPosition().getX(), chunk.getPosition().getY());
                 });
-            }
-            if (chunk.dirty) {
-                chunk.mesh.lock.lock();
-                Renderer.updateMeshC(chunk.mesh);
-                chunk.dirty = false;
-                chunk.mesh.lock.unlock();
             }
 
             // Our GPU-side chunk will never change.

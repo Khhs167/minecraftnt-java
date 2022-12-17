@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A socket interface for packets, is in use for PacketClient and PacketConnection
@@ -83,7 +85,8 @@ public class PacketSocket {
 
         ByteBuffer readData = ByteBuffer.allocate(channel.socket().getInputStream().available());
         channel.read(readData);
-        DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(readData.array()));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(readData.array());
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
 
         while(true) {
             if(currentReadLength == -1) {
@@ -158,7 +161,7 @@ public class PacketSocket {
         out.write(0);
         packet.write(out);
 
-        ByteArrayOutputStream actualOutput = new ByteArrayOutputStream();
+        ByteArrayOutputStream actualOutput = new ByteArrayOutputStream(packet.minimalSize());
         DataOutputStream dataOutputStream = new DataOutputStream(actualOutput);
         dataOutputStream.writeLong(PACKET_HEADER);
         dataOutputStream.writeInt(outputStream.size());
@@ -172,4 +175,7 @@ public class PacketSocket {
         return channel;
     }
 
+    public boolean connected() {
+        return channel.isConnected() && channel.isOpen();
+    }
 }

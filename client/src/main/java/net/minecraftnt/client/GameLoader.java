@@ -20,13 +20,16 @@ public class GameLoader implements ClientLoader {
         LOGGER.info("Loading shaders");
         Renderer.shaderProviderC().load(Shader.DEFAULT);
 
+        LOGGER.info("Loading ShapeGenerators");
+        Registries.SHAPE_GENERATOR.register(ShapeGenerator.BLOCK, new VoxelGenerator());
+
+    }
+
+    @Override
+    public void loadResources() {
         LOGGER.info("Loading textures");
         Renderer.textureProviderC().load(new Identifier("minecraftnt", "vroom"));
         Renderer.textureProviderC().load(new Identifier("minecraftnt", "terrain"));
         TextureAtlasLocation.loadLocations("atlasmap");
-
-        LOGGER.info("Loading ShapeGenerators");
-        Registries.SHAPE_GENERATOR.register(ShapeGenerator.BLOCK, new VoxelGenerator());
-
     }
 }

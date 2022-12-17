@@ -64,34 +64,7 @@ public class WorldIO {
 
             if (chunkFile.exists()) {
                 NBTReader reader = new NBTReader(new FileInputStream(chunkFile));
-                reader.parse();
-
-                NBTCompoundNode rootNode = (NBTCompoundNode) reader.getRoot();
-
-                Chunk chunk = new Chunk(position);
-
-                assert rootNode.getChild("idList") instanceof NBTListNode;
-                NBTListNode<NBTCompoundNode> idNode = (NBTListNode<NBTCompoundNode>) rootNode.getChild("idList");
-
-                for (NBTCompoundNode id : idNode.getData()) {
-                    chunk.setBlockID(id.getShort("key"), new Identifier(id.getString("namespace"), id.getString("name")));
-                }
-
-                int index = 0;
-
-                assert rootNode.getChild("data") instanceof NBTListNode;
-                NBTListNode<NBTValueNode<Short>> dataNode = (NBTListNode<NBTValueNode<Short>>) rootNode.getChild("data");
-
-                for (int x = 0; x < Chunk.CHUNK_WIDTH; x++) {
-                    for (int z = 0; z < Chunk.CHUNK_WIDTH; z++) {
-                        for (int y = 0; y < Chunk.CHUNK_HEIGHT; y++) {
-                            chunk.setBlock(x, y, z, dataNode.get(index).getValue());
-                            index++;
-                        }
-                    }
-                }
-                LOGGER.debug("Loaded chunk from file!");
-                return chunk;
+                return ChunkNBTInterface.load(reader, position);
 
 
             }
@@ -111,36 +84,7 @@ public class WorldIO {
             chunkFile.createNewFile();
 
             NBTWriter writer = new NBTWriter(new FileOutputStream(chunkFile));
-            writer.beginCompound("chunk");
-
-            writer.beginList("idList", "compound");
-
-            var idMap = chunk.getBlockMap();
-
-            for(var key : idMap.keySet()) {
-                writer.beginCompound("");
-                writer.writeShort("key", key);
-                writer.writeString("namespace", idMap.get(key).getNamespace());
-                writer.writeString("name", idMap.get(key).getName());
-                writer.endCompound();
-            }
-            writer.endList();
-
-            writer.writeInt("width", Chunk.CHUNK_WIDTH);
-            writer.writeInt("height", Chunk.CHUNK_HEIGHT);
-
-            writer.beginList("data", "short");
-            for(int x = 0; x < Chunk.CHUNK_WIDTH; x++){
-                for(int z = 0; z < Chunk.CHUNK_WIDTH; z++){
-                    for (int y = 0; y < Chunk.CHUNK_HEIGHT; y++){
-                        writer.writeShort("", chunk.getID(x, y, z));
-                    }
-                }
-            }
-            writer.endList();
-
-            writer.endCompound();
-            writer.flush();
+            ChunkNBTInterface.write(writer, chunk);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

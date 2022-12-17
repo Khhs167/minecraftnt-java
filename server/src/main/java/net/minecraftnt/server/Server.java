@@ -31,7 +31,9 @@ public class Server implements Runnable {
         PacketListener listener = new PacketListener(25569);
 
         LOGGER.info("Loading mods");
-        ModLoader modLoader = new ModLoader();
+        ModLoader modLoader = ModLoader.getLatest();
+        if(modLoader == null)
+            modLoader = new ModLoader();
 
         modLoader.loadMods(false);
 

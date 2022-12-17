@@ -37,11 +37,7 @@ public class Transformation implements Serializable {
     }
 
     public Matrix4 getMatrix() {
-        Matrix4 matrix = Matrix4.identity();
-        matrix = Matrix4.rotate(matrix, rotation.add(new Vector3(0, 0, 180)));
-        matrix = Matrix4.translate(matrix, position);
-        matrix = Matrix4.scale(matrix, scale);
-        return matrix;
+        return Matrix4.transformation(this);
     }
 
     public Transformation translate(Vector3 translation) {
@@ -78,28 +74,32 @@ public class Transformation implements Serializable {
         return this;
     }
 
-    // TODO: See if there is a better way to solve this piece of shit algorithm
+    private Quaternionf quaternionEuler(Vector3 euler) {
+        Quaternionf quaternion = new Quaternionf();
+
+        quaternion = quaternion.rotateX(euler.getX());
+        quaternion = quaternion.rotateY(euler.getY());
+        quaternion = quaternion.rotateZ(euler.getZ());
+
+        return quaternion;
+    }
+
+    private Vector3 rotateVector(Quaternionf quaternion, Vector3 vector) {
+        Vector3f vector3f = new Vector3f(vector.getX(), vector.getY(), vector.getZ());
+        vector3f = quaternion.transform(vector3f);
+        return new Vector3(vector3f.x, vector3f.y, vector3f.z);
+    }
+
     public Vector3 forward() {
-        float X = (float) (Math.sin(Math.toRadians(rotation.getY())) * Math.cos(Math.toRadians(rotation.getX())));
-        float Y = (float) Math.sin(Math.toRadians(-rotation.getX()));
-        float Z = (float) (Math.cos(Math.toRadians(rotation.getX())) * Math.cos(Math.toRadians(rotation.getY())));
-        return new Vector3(X, Y, Z).normalized();
+        return rotateVector(quaternionEuler(rotation), Vector3.FORWARD);
     }
 
     public Vector3 right() {
-        float X = (float) (Math.sin(Math.toRadians(rotation.getY() + 90)) * Math.cos(Math.toRadians(rotation.getX())));
-        float Y = (float) Math.sin(Math.toRadians(-rotation.getX()));
-        float Z = (float) (Math.cos(Math.toRadians(rotation.getX())) * Math.cos(Math.toRadians(rotation.getY() + 90)));
-
-        return new Vector3(X, Y, Z).normalized();
+        return rotateVector(quaternionEuler(rotation), Vector3.RIGHT);
     }
 
     public Vector3 up() {
-        float X = (float) (Math.sin(Math.toRadians(rotation.getY())) * Math.cos(Math.toRadians(rotation.getX() + 90)));
-        float Y = (float) Math.sin(Math.toRadians(-rotation.getX() + 90));
-        float Z = (float) (Math.cos(Math.toRadians(rotation.getX() + 90)) * Math.cos(Math.toRadians(rotation.getY())));
-
-        return new Vector3(X, Y, Z).normalized();
+        return rotateVector(quaternionEuler(rotation), Vector3.UP);
     }
 
     public Transformation move(Vector3 movement){

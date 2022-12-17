@@ -38,6 +38,9 @@ public class GLMesh extends Mesh {
     }
 
     public void render() {
+        if(dirty)
+            updateMesh();
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, vertices_baked);
     }

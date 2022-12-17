@@ -8,50 +8,43 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 public class Resources {
+    private static final ResourceProvider[] resourceProviders = {
+            new ClassResources(),
+            new FolderResources()
+    };
     public static byte[] readBytes(String name){
-
-        byte[] folderBytes = FolderResources.loadResourceAsBytes(name);
-        if(folderBytes != null)
-            return folderBytes;
-
-        byte[] classBytes = ClassResources.loadResourceAsBytes(name);
-        if(classBytes != null)
-            return classBytes;
-
-        return null;
+        try(InputStream fileStream = readStream(name)) {
+            if(fileStream == null)
+                return null;
+            return fileStream.readAllBytes();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public static boolean exists(String name){
 
-        if(FolderResources.fileExists(name))
-            return true;
-
-        if(ClassResources.fileExists(name))
-            return true;
+        for (ResourceProvider provider : resourceProviders) {
+            if(provider.fileExists(name))
+                return true;
+        }
 
         return false;
     }
 
     public static String readString(String name){
-        String folderString = FolderResources.loadResourceAsString(name);
-        if(folderString != null)
-            return folderString;
-
-        String classString = ClassResources.loadResourceAsString(name);
-        if(classString != null)
-            return classString;
-
+        byte[] data = readBytes(name);
+        if(data != null)
+            return new String(data);
         return null;
     }
 
-    public static InputStream readStream(String fileName) {
-        InputStream folderStream = FolderResources.loadResourceAsStream(fileName);
-        if(folderStream != null)
-            return folderStream;
-
-        InputStream classStream = ClassResources.loadResourceAsStream(fileName);
-        if(classStream != null)
-            return classStream;
+    public static InputStream readStream(String name) {
+        for (ResourceProvider provider : resourceProviders) {
+            InputStream data = provider.loadResourceAsStream(name);
+            if(data != null)
+                return data;
+        }
 
         return null;
     }

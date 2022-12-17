@@ -13,9 +13,6 @@ public class Registry<T> {
     }
 
     public T register(Identifier identifier, T value){
-        if(registry_data.containsKey(identifier))
-            return value;
-
         registry_data.put(identifier, value);
         return value;
     }

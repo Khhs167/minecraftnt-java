@@ -2,6 +2,7 @@ package net.minecraftnt.client;
 
 
 import net.minecraftnt.MinecraftntData;
+import net.minecraftnt.ModLoader;
 import net.minecraftnt.server.data.GameData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +15,7 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -21,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class ThreadDownloadResources extends Thread {
 
@@ -37,6 +41,8 @@ public class ThreadDownloadResources extends Thread {
     }
 
     public void tryReload() {
+        if (needsReload)
+            ModLoader.getLatest().reloadResources();
         needsReload = false;
     }
 
@@ -45,7 +51,7 @@ public class ThreadDownloadResources extends Thread {
         needsReload = false;
 
         LOGGER.info("Pinging {} to check for internet connection", PING_URL);
-        if(!netIsAvailable()){
+        if (!netIsAvailable()) {
             LOGGER.warn("No internet connection is available! No resources will be downloaded!\n");
         }
 
@@ -53,11 +59,9 @@ public class ThreadDownloadResources extends Thread {
 
         readAndDownloadListing(ASSET_URL);
 
-        needsReload = true;
-
     }
 
-    public void readAndDownloadListing(String indexURL){
+    public void readAndDownloadListing(String indexURL) {
         LOGGER.info("Reading listing at {}", indexURL);
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -78,17 +82,17 @@ public class ThreadDownloadResources extends Thread {
             Element listingElement = fileListing.getDocumentElement();
             listingElement.normalize();
 
-            if(!listingElement.getTagName().equals("DirectoryListing")){
+            if (!listingElement.getTagName().equals("DirectoryListing")) {
                 LOGGER.fatal("Invalid directory listing!");
                 throw new RuntimeException("Invalid Directory Listing: expected 'DirectoryListing', got '" + listingElement.getTagName() + "'");
             }
 
-            if(listingElement.getElementsByTagName("DirectoryName").getLength() <= 0){
+            if (listingElement.getElementsByTagName("DirectoryName").getLength() <= 0) {
                 LOGGER.fatal("Invalid directory listing!");
                 throw new RuntimeException("Invalid Directory Listing: expected 'DirectoryName' attribute! Got none!");
             }
 
-            if(listingElement.getElementsByTagName("Files").getLength() <= 0){
+            if (listingElement.getElementsByTagName("Files").getLength() <= 0) {
                 LOGGER.fatal("Invalid directory listing!");
                 throw new RuntimeException("Invalid Directory Listing: expected 'Files' attribute! Got none!");
             }
@@ -97,10 +101,10 @@ public class ThreadDownloadResources extends Thread {
 
             NodeList subNodes = fileElement.getChildNodes();
 
-            for(int i = 0; i < subNodes.getLength(); i++){
+            for (int i = 0; i < subNodes.getLength(); i++) {
                 Node node = subNodes.item(i);
 
-                if(!node.getNodeName().equals("FileListing")){
+                if (!node.getNodeName().equals("FileListing")) {
                     LOGGER.fatal("Invalid file listing!");
                     throw new RuntimeException("Invalid File Listing: expected 'FileListing' node, got '" + node.getNodeName() + "'!");
                 }
@@ -108,15 +112,17 @@ public class ThreadDownloadResources extends Thread {
                 String type = null;
                 long size = -1;
                 String name = null;
+                String checksum = null;
 
                 NodeList fileInfoNodes = node.getChildNodes();
 
-                for(int j = 0; j < fileInfoNodes.getLength(); j++){
+                for (int j = 0; j < fileInfoNodes.getLength(); j++) {
 
                     switch (fileInfoNodes.item(j).getNodeName()) {
                         case "Type" -> type = fileInfoNodes.item(j).getTextContent();
                         case "Size" -> size = Long.parseLong(fileInfoNodes.item(j).getTextContent());
                         case "Name" -> name = fileInfoNodes.item(j).getTextContent();
+                        case "Checksum" -> checksum = fileInfoNodes.item(j).getTextContent();
                         default -> {
                             LOGGER.fatal("Invalid file listing");
                             throw new RuntimeException("Invalid File Listing: expected 'Type', 'Size' or 'Name' child node, got '" + node.getNodeName() + "'!");
@@ -125,46 +131,52 @@ public class ThreadDownloadResources extends Thread {
 
                 }
 
-                if(type == null){
+                if (type == null) {
                     LOGGER.fatal("Invalid file listing");
                     throw new RuntimeException("Invalid File Listing: expected 'Type' child node, got none!");
                 }
 
-                if(name == null){
+                if (name == null) {
                     LOGGER.fatal("Invalid file listing");
                     throw new RuntimeException("Invalid File Listing: expected 'Name' child node, got none!");
                 }
 
-                if(!type.equals("file") && !type.equals("directory")){
+                if (!type.equals("file") && !type.equals("directory")) {
                     LOGGER.fatal("Invalid file listing");
                     throw new RuntimeException("Invalid File Listing: expected 'file' or 'directory' type, got '" + type + "'!");
                 }
 
-                if(type.equals("file") && size < 0){
+                if (type.equals("file") && size < 0) {
                     LOGGER.fatal("Invalid file listing");
                     throw new RuntimeException("Invalid File Listing: expected 0> size, got " + size + "!(-1 is default)");
                 }
 
+                if (checksum == null && type.equals("file")) {
+                    LOGGER.fatal("Invalid file listing");
+                    throw new RuntimeException("Invalid File Listing: expected 'Checksum' child node, got none!");
+                }
+
                 File resourceFile = new File(GameData.getResourceLocation(name));
 
-                if(type.equals("directory")){
-                    if(!resourceFile.exists()) {
+                if (type.equals("directory")) {
+                    if (!resourceFile.exists()) {
                         if (!resourceFile.mkdirs()) {
                             LOGGER.fatal("Could not create directory " + name);
                             throw new RuntimeException("Directory creation failed!");
                         }
                     }
                 } else {
-                    if(!resourceFile.exists() || Files.size(resourceFile.toPath()) != size) {
+                    if (!resourceFile.exists() || Files.size(resourceFile.toPath()) != size || !checksum(resourceFile).equals(checksum)) {
                         URL downloadURL = new URL(new URL(indexURL), name);
                         downloadAndSaveResource(downloadURL, size, resourceFile);
+                        needsReload = true;
                     }
                 }
 
             }
 
 
-        } catch (Exception e){
+        } catch (Exception e) {
 
             StringWriter stringWriter = new StringWriter();
             PrintWriter stackTraceStream = new PrintWriter(stringWriter);
@@ -175,7 +187,38 @@ public class ThreadDownloadResources extends Thread {
         }
     }
 
-    private static void downloadAndSaveResource(URL url, long size, File output){
+    private static String checksum(File file) {
+        try(FileInputStream inputStream = new FileInputStream(file)) {
+            byte[] data = inputStream.readAllBytes();
+
+            // Static getInstance method is called with hashing SHA
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+            // digest() method called
+            // to calculate message digest of an input
+            // and return array of byte
+            return toHexString(md.digest(data));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String toHexString(byte[] hash) {
+        // Convert byte array into signum representation
+        BigInteger number = new BigInteger(1, hash);
+
+        // Convert message digest into hex value
+        StringBuilder hexString = new StringBuilder(number.toString(16));
+
+        // Pad with leading zeros
+        while (hexString.length() < 64) {
+            hexString.insert(0, '0');
+        }
+
+        return hexString.toString();
+    }
+
+    private static void downloadAndSaveResource(URL url, long size, File output) {
 
         try {
 
@@ -186,7 +229,7 @@ public class ThreadDownloadResources extends Thread {
             InputStream in = url.openStream();
             Files.copy(in, outPath, StandardCopyOption.REPLACE_EXISTING);
 
-            if(Files.size(outPath) != size){
+            if (Files.size(outPath) != size) {
                 Files.delete(outPath);
                 LOGGER.fatal("File size " + size + " != " + Files.size(outPath));
                 throw new RuntimeException("Invalid file size!");

@@ -127,7 +127,6 @@ public class Chunk {
                 }
             }
         }
-
         mesh.setVertices(vertices.toArray(new Vertex[0]));
     }
 
