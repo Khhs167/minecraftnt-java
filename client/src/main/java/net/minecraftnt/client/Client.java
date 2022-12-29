@@ -3,34 +3,36 @@ package net.minecraftnt.client;
 import net.minecraftnt.InputCommand;
 import net.minecraftnt.ModLoader;
 import net.minecraftnt.builtin.entities.CameraFlightPawn;
+import net.minecraftnt.client.rendering.Camera;
+import net.minecraftnt.client.sound.MCSound;
+import net.minecraftnt.rendering.TextureData;
+import net.minecraftnt.client.utility.TextureLoader;
 import net.minecraftnt.entities.Pawn;
-import net.minecraftnt.nbt.NBTReader;
-import net.minecraftnt.nbt.NBTWriter;
-import net.minecraftnt.nbt.nodes.NBTCompoundNode;
 import net.minecraftnt.networking.*;
-import net.minecraftnt.rendering.Mesh;
 import net.minecraftnt.rendering.Renderer;
 import net.minecraftnt.rendering.Shader;
-import net.minecraftnt.rendering.Vertex;
 import net.minecraftnt.server.Server;
 import net.minecraftnt.server.data.resources.Resources;
 import net.minecraftnt.server.packets.*;
 import net.minecraftnt.server.world.Chunk;
 import net.minecraftnt.server.world.ChunkPosition;
 import net.minecraftnt.threading.BalancedThreadPool;
-import net.minecraftnt.threading.WeightedRunnable;
 import net.minecraftnt.util.Identifier;
-import net.minecraftnt.util.maths.Matrix4;
 import net.minecraftnt.util.maths.Transformation;
-import net.minecraftnt.util.maths.Vector2;
 import net.minecraftnt.util.maths.Vector3;
 import net.minecraftnt.client.platform.Window;
-import net.minecraftnt.server.world.WorldGenerator;
 import net.minecraftnt.server.world.World;
+import net.minecraftnt.util.noise.FractalPerlin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.random.RandomGenerator;
@@ -43,8 +45,8 @@ public class Client implements Runnable{
     }
 
     private World world;
-    private int render_distance = 1;
-    private Transformation cameraTransform = new Transformation();
+    private int render_distance = 5;
+    private Camera camera = new Camera();
     private ChunkPosition previousCameraChunk = new ChunkPosition(0, 0);
     private Pawn currentPawn = new CameraFlightPawn();
     private Queue<InputCommand> inputCommands = new LinkedList<>();
@@ -55,13 +57,17 @@ public class Client implements Runnable{
         if(packet.getTypeIdentifier() == ChunksPacket.IDENTIFIER) {
             ChunksPacket chunksPacket = (ChunksPacket)packet;
             Chunk chunk = chunksPacket.getChunk();
-            world.setChunk(chunk);
+            chunk.mesh = Renderer.createMeshC();
+            World.THREADED_EXECUTOR.enqueue(() -> {
+                world.rebuildNeighbours(chunk.getPosition().getX(), chunk.getPosition().getY());
+                world.setChunk(chunk);
+            }, 30);
             return;
         }
 
         if(packet.getTypeIdentifier() == CameraTransformPacket.IDENTIFIER) {
             Transformation newTransform = ((CameraTransformPacket)packet).transformation;
-            if(newTransform.getPosition().subtract(cameraTransform.getPosition()).lengthSquared() > 100f && positionLagTimer > 10f) {
+            if(newTransform.getPosition().subtract(camera.getTransform().getPosition()).lengthSquared() > 100f && positionLagTimer > 10f) {
                 //cameraTransform.setPosition(newTransform.getPosition());
                 positionLagTimer = 0f;
             }
@@ -83,25 +89,21 @@ public class Client implements Runnable{
         modLoader.loadMods(true);
 
         LOGGER.info("Connecting to server");
-        PacketClient client = new PacketClient();
+        ThreadedPacketClient client = new ThreadedPacketClient();
 
-        try {
-            client.connect("localhost", 25569);
-            LOGGER.info("Established connection");
-            LOGGER.info("Sending request");
-            client.send(new ConnectPacket());
+        client.start("localhost", 25569);
+        LOGGER.info("Established connection");
+        LOGGER.info("Sending request");
+        client.send(new ConnectPacket());
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        TextureLoader.loadAtlas(new Identifier("minecraftnt", "blocks"));
 
-        Transformation transformation = new Transformation();
 
         //Renderer.create(RenderAPI.OPENGL);
 
         world = new World();
 
-        cameraTransform.setPosition(new Vector3(5,  50, -15));
+        camera.setPosition(new Vector3(5,  50, -15));
         //cameraTransform.setRotationX(45);
 
         for(int x = -render_distance; x <= render_distance; x++) {
@@ -152,41 +154,44 @@ public class Client implements Runnable{
                 client.send(new InputPacket(c));
             }
 
-            cameraTransform = currentPawn.transform(cameraTransform, window.getFrameTime());
+            currentPawn.transform(camera.getTransform(), window.getFrameTime());
 
-            ChunkPosition cameraChunkPos = new ChunkPosition((int) Math.floor(cameraTransform.getPosition().getX() / Chunk.CHUNK_WIDTH), (int) Math.floor(cameraTransform.getPosition().getZ() / Chunk.CHUNK_WIDTH));
+            ChunkPosition cameraChunkPos = new ChunkPosition((int) Math.floor(camera.getTransform().getPosition().getX() / Chunk.CHUNK_WIDTH), (int) Math.floor(camera.getTransform().getPosition().getZ() / Chunk.CHUNK_WIDTH));
 
-            if (!cameraChunkPos.equals(previousCameraChunk)) {
+            if(previousCameraChunk == null)
                 previousCameraChunk = cameraChunkPos;
 
-                if (!world.hasChunk(cameraChunkPos)) {
-                    client.send(new ChunkRequestPacket(cameraChunkPos.getX(), cameraChunkPos.getY()));
+            if (cameraChunkPos != previousCameraChunk) {
+                previousCameraChunk = cameraChunkPos;
+                for (int x = -render_distance; x <= render_distance; x++) {
+                    for (int z = -render_distance; z <= render_distance; z++) {
+                        ChunkPosition position = new ChunkPosition(cameraChunkPos.getX() + x, cameraChunkPos.getY() + z);
+                        if (!world.hasChunk(cameraChunkPos))
+                            client.send(new ChunkRequestPacket(position.getX(), position.getY()));
+                    }
                 }
+
             }
 
             Renderer.shaderProviderC().bind(Shader.DEFAULT);
 
 
-            Renderer.shaderProviderC().setProjection(Matrix4.perspective(90, window.getAspectRatio(), 0.01f, 1000f));
-            Renderer.shaderProviderC().setView(cameraTransform.getMatrix());
+            Renderer.shaderProviderC().setProjection(camera.getProjectionMatrix(window.getAspectRatio()));
+            Renderer.shaderProviderC().setView(camera.getViewMatrix());
 
             Renderer.shaderProviderC().setFloat("time", window.getTime());
 
-            Renderer.textureProviderC().bind(new Identifier("minecraftnt", "terrain"), 0);
+            Renderer.textureProviderC().bind(new Identifier("minecraftnt", "blocks"), 0);
 
             world.render();
 
             BalancedThreadPool.getGlobalInstance().ping();
 
-            try {
-                client.ping();
-            } catch (IOException e) {
-                LOGGER.error("Packet Error: " + e);
-            }
-
             Packet c;
             while ((c = client.get()) != null)
                 handlePacket(c);
+
+            threadDownloadResources.tryReload();
 
             positionLagTimer += window.getFrameTime();
         }
@@ -196,6 +201,8 @@ public class Client implements Runnable{
         window.dispose();
         client.close();
         Renderer.shaderProviderC().dispose();
+
+        LOGGER.info("Client closed");
     }
 
     public static void main(String[] args) {
@@ -205,6 +212,49 @@ public class Client implements Runnable{
         LOGGER.info("Probability of success: {}%", RandomGenerator.getDefault().nextInt(50, 100));
         LOGGER.info("Available cores: {}, using {} for threading", Runtime.getRuntime().availableProcessors(), BalancedThreadPool.GLOBAL_SIZE);
 
+        try {
+            runGame();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        System.exit(0);
+
+    }
+
+    private static void soundTest() {
+        MCSound.create();
+        MCSound mcSound = MCSound.getInstance();
+        short source = mcSound.createSource(false, false);
+
+        final boolean stream = true;
+
+        LOGGER.info("Reading sound");
+        short clip;
+        InputStream inputStream = Resources.readStream("mario.mp3");
+        if(stream)
+            clip = mcSound.readStreamingClip(inputStream);
+        else
+            clip = mcSound.readClip(inputStream);
+
+        LOGGER.info("Read sound!");
+        mcSound.setVolume(source, 1.0f);
+        mcSound.play(source, clip);
+
+        if(stream)
+            mcSound.startStream(source, clip);
+        else
+            mcSound.play(source, clip);
+
+        if(stream)
+            while(!mcSound.done(clip)) mcSound.stream(source, clip);
+        else
+            while(mcSound.playing(source)) Thread.onSpinWait();
+
+        mcSound.close();
+    }
+
+    private static void runGame() {
         Server server = new Server();
         Thread serverThread = new Thread(server);
         serverThread.setName("Server");

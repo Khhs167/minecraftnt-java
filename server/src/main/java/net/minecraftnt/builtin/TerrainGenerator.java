@@ -2,7 +2,8 @@ package net.minecraftnt.builtin;
 
 import net.minecraftnt.server.world.*;
 import net.minecraftnt.util.Identifier;
-import net.minecraftnt.util.maths.FastNoiseLite;
+import net.minecraftnt.util.noise.FastNoiseLite;
+import net.minecraftnt.util.noise.FractalPerlin;
 
 public class TerrainGenerator extends WorldGenerator {
 
@@ -12,14 +13,19 @@ public class TerrainGenerator extends WorldGenerator {
     }
 
     public static class BiomeGen extends BiomeGenerator {
-        private static final FastNoiseLite fastNoiseLite = new FastNoiseLite();
+        private static final FractalPerlin perlin = new FractalPerlin();
 
+        static {
+            perlin.octaves = 8;
+            perlin.sizes = 0.5f;
+            perlin.fallOff = 0.5f;
+        }
 
         @Override
         public Chunk generateChunk(int x, int z, Chunk c) {
             for (int cx = 0; cx < Chunk.CHUNK_WIDTH; cx++) {
                 for (int cz = 0; cz < Chunk.CHUNK_WIDTH; cz++) {
-                    int height = 40 + (int) (fastNoiseLite.GetNoise(x * Chunk.CHUNK_WIDTH + cx, z * Chunk.CHUNK_WIDTH + cz) * 10);
+                    int height = 40 + (int) (perlin.GetNoise(x * Chunk.CHUNK_WIDTH + cx, z * Chunk.CHUNK_WIDTH + cz) * 10);
                     for (int y = 0; y < height; y++) {
                         if (y < height - 3)
                             c.setBlock(cx, y, cz, Block.STONE);

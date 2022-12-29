@@ -12,7 +12,7 @@ public class Registries {
     public static final Registry<ShapeGenerator> SHAPE_GENERATOR = new Registry<>();
     public static final Registry<Shader> SHADER = new Registry<>();
     public static final Registry<Texture> TEXTURE = new Registry<>();
-    public static final Registry<TextureAtlasLocation> TEXTURE_ATLAS_LOC = new Registry<>();
+    public static final Registry<TextureAtlasLocation> TEXTURE_ATLAS_LOC = new Registry<>(TextureAtlasLocation.NULL);
     public static final Registry<Block> BLOCKS = new Registry<>();
     public static final Registry<RenderAPI> RENDER_API = new Registry<>();
     public static final Registry<BiomeGenerator> BIOME_GENERATOR = new Registry<>();

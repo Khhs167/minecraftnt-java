@@ -3,6 +3,7 @@ package net.minecraftnt.client;
 import net.minecraftnt.Registries;
 import net.minecraftnt.api.ClientLoader;
 import net.minecraftnt.client.rendering.gl.GLRenderer;
+import net.minecraftnt.client.utility.TextureLoader;
 import net.minecraftnt.rendering.*;
 import net.minecraftnt.client.builtin.VoxelGenerator;
 import net.minecraftnt.util.Identifier;
@@ -30,6 +31,8 @@ public class GameLoader implements ClientLoader {
         LOGGER.info("Loading textures");
         Renderer.textureProviderC().load(new Identifier("minecraftnt", "vroom"));
         Renderer.textureProviderC().load(new Identifier("minecraftnt", "terrain"));
-        TextureAtlasLocation.loadLocations("atlasmap");
+
+        TextureLoader.loadAtlas(new Identifier("minecraftnt", "blocks"));
+
     }
 }

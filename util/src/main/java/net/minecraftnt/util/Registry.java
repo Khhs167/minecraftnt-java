@@ -6,10 +6,22 @@ import java.util.HashMap;
 
 public class Registry<T> {
 
+    public Registry(Identifier nullIdentifier) {
+        NULL = nullIdentifier;
+    }
+
+    public Registry() {
+        this(null);
+    }
+
     private final HashMap<Identifier, T> registry_data = new HashMap<>();
+    private final Identifier NULL;
 
     public T get(Identifier identifier){
-        return registry_data.get(identifier);
+        T value = registry_data.get(identifier);
+        if(value != null)
+            return value;
+        return registry_data.get(NULL);
     }
 
     public T register(Identifier identifier, T value){

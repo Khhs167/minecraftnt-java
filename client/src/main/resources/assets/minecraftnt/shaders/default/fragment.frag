@@ -10,9 +10,10 @@ in struct VertexData {
 } Vertex;
 
 void main() {
-    vec4 texture_color = texture2D(texture, Vertex.uv);
+    vec2 actualUV = vec2(Vertex.uv.x, 1 - Vertex.uv.y);
+    vec4 texture_color = texture2D(texture, actualUV);
 
-    float lighting = (Vertex.lighting * 0.9f) + 0.1f;
+    float lighting = Vertex.lighting;//(Vertex.lighting * 0.9f) + 0.1f;
 
     vec4 shaded_color = vec4(texture_color.rgb * lighting, texture_color.a);
 

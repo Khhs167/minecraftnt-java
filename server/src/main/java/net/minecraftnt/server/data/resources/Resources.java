@@ -6,11 +6,12 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 
 public class Resources {
     private static final ResourceProvider[] resourceProviders = {
-            new ClassResources(),
-            new FolderResources()
+            new FolderResources(),
+            new ClassResources()
     };
     public static byte[] readBytes(String name){
         try(InputStream fileStream = readStream(name)) {
@@ -20,6 +21,21 @@ public class Resources {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    public static String[] getDirectoryContents(String directory) {
+        ArrayList<String> content = new ArrayList<>();
+
+        for(ResourceProvider provider : resourceProviders) {
+            String[] providerDirectoryContents = provider.getDirectoryContents(directory);
+
+            for(String c : providerDirectoryContents) {
+                if(!content.contains(c))
+                    content.add(c);
+            }
+        }
+
+        return content.toArray(new String[0]);
     }
 
     public static boolean exists(String name){

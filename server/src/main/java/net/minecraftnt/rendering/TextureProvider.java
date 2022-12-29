@@ -12,8 +12,7 @@ public abstract class TextureProvider {
     private static final Logger LOGGER = LogManager.getLogger(TextureProvider.class);
 
     public abstract Texture load(Identifier identifier);
+    public abstract Texture loadData(TextureData data, Identifier identifier);
     public abstract boolean bind(Identifier identifier, int id);
 
-    public record TextureData(ByteBuffer dataBuffer, int width, int height) {
-    }
 }
