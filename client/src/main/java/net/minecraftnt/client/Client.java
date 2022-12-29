@@ -222,38 +222,6 @@ public class Client implements Runnable{
 
     }
 
-    private static void soundTest() {
-        MCSound.create();
-        MCSound mcSound = MCSound.getInstance();
-        short source = mcSound.createSource(false, false);
-
-        final boolean stream = true;
-
-        LOGGER.info("Reading sound");
-        short clip;
-        InputStream inputStream = Resources.readStream("mario.mp3");
-        if(stream)
-            clip = mcSound.readStreamingClip(inputStream);
-        else
-            clip = mcSound.readClip(inputStream);
-
-        LOGGER.info("Read sound!");
-        mcSound.setVolume(source, 1.0f);
-        mcSound.play(source, clip);
-
-        if(stream)
-            mcSound.startStream(source, clip);
-        else
-            mcSound.play(source, clip);
-
-        if(stream)
-            while(!mcSound.done(clip)) mcSound.stream(source, clip);
-        else
-            while(mcSound.playing(source)) Thread.onSpinWait();
-
-        mcSound.close();
-    }
-
     private static void runGame() {
         Server server = new Server();
         Thread serverThread = new Thread(server);
